@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wzwl.parking.dao.ParkingLotMapper">
+
+    <resultMap type="com.wzwl.parking.model.ParkingLot" id="parkingLot">
+    </resultMap>
+
+    <select id = "getParkingLotById"  resultType = "com.wzwl.parking.model.ParkingLot"  >
+        select * from t_parking_lot where  company_id = #{companyId}  and park_id = #{parkId}
+    </select>
+
+
+</mapper>

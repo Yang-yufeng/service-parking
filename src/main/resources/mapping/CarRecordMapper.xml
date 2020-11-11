@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wzwl.parking.dao.CarRecordMapper">
+
+    <resultMap type="com.wzwl.parking.model.CarRecord" id="carRecord">
+    </resultMap>
+
+    <select id = "getCarRecordByEntryTime"  resultType = "com.wzwl.parking.model.CarRecord"  >
+        select * from t_parking_car_record where  entry_time = #{entryTime}   and company_id = #{companyId}
+        <if test="carNo != null">
+            and car_no = #{carNo}
+        </if>
+        <if test="cardNo != null">
+            and card_no = #{cardNo}
+        </if>
+    </select>
+
+
+
+</mapper>
