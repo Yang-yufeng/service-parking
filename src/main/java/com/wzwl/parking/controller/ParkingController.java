@@ -37,7 +37,7 @@ public class ParkingController {
      * @param useSpace 已用车位
      * @return
      */
-    @RequestMapping("/car_in")
+    @RequestMapping("/carIn")
     public String carIn(@RequestParam String companyId, @RequestParam String parkId,
                         String carNo,String cardNo, @RequestParam Integer entryTime,
                         @RequestParam String entryName, @RequestParam Integer cardType,
@@ -59,7 +59,7 @@ public class ParkingController {
      * @param useSpace 已用车位
      * @return
      */
-    @RequestMapping("/car_out")
+    @RequestMapping("/carOut")
     public String carOut(@RequestParam String companyId, @RequestParam String parkId,
                          @RequestParam Integer entryTime, @RequestParam Integer exitTime,
                          @RequestParam String exitName, String exitImage,String carNo, String cardNo,
@@ -78,7 +78,7 @@ public class ParkingController {
      * @param payMoney 支付金额
      * @return
      */
-    @RequestMapping("/car_charge")
+    @RequestMapping("/carCharge")
     public String carCharge(@RequestParam String companyId, @RequestParam String parkId,
                          @RequestParam Integer entryTime, @RequestParam Integer payTime,
                          @RequestParam Integer payMoney,String carNo, String cardNo){
@@ -105,7 +105,7 @@ public class ParkingController {
      * @param imgUrl 图片
      * @return
      */
-    @RequestMapping("/add_parkinglot")
+    @RequestMapping("/addParkinglot")
     public String addParkingLot(@RequestParam String companyId, @RequestParam String parkId, @RequestParam String name,
                                 @RequestParam Integer totalSpace, @RequestParam Integer limitLength, @RequestParam Integer limitWidth,
                                 @RequestParam Integer limitHeight, @RequestParam String address, @RequestParam String telephone
@@ -122,7 +122,7 @@ public class ParkingController {
      * @param pageSize 每页返回最大记录数
      * @return
      */
-    @RequestMapping("/list_parkinglot")
+    @RequestMapping("/listParkinglots")
     public String listParkingLot(@RequestParam String companyId,@RequestParam(defaultValue="1") Integer page,
                                  @RequestParam(defaultValue="10") Integer pageSize){
         return parkingService.listParkingLot(companyId,page,pageSize);
@@ -138,7 +138,7 @@ public class ParkingController {
      * @param exitTime 出场时间
      * @return
      */
-    @RequestMapping("/list_car_record")
+    @RequestMapping("/listCarRecords")
     public String listCarRecord(@RequestParam String companyId,@RequestParam(defaultValue="1") Integer page,
                                  @RequestParam(defaultValue="10") Integer pageSize,String carNo,String cardNo,Integer exitTime){
         return parkingService.listCarRecord(companyId,page,pageSize,carNo,cardNo,exitTime);
