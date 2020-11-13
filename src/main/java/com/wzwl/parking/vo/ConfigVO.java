@@ -1,4 +1,4 @@
-package com.wzwl.parking.model;
+package com.wzwl.parking.vo;
 
 import lombok.Data;
 
@@ -9,7 +9,7 @@ import lombok.Data;
  * @Date 2020/11/5 18:24
  * @Version 1.0
  */@Data
-public class ConfigVo {
+public class ConfigVO {
 
     /**配置名字**/
     private String configName;

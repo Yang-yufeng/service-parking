@@ -1,8 +1,7 @@
 package com.wzwl.parking.dao;
 
-import com.wzwl.parking.model.ConfigVo;
+import com.wzwl.parking.vo.ConfigVO;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -14,7 +13,7 @@ import java.util.List;
  * @Version 1.0
  */
 @Mapper
-public interface ConfigVoMapper {
+public interface ConfigVOMapper {
 
 
     /**
@@ -30,5 +29,5 @@ public interface ConfigVoMapper {
      * @param companyId 企业ID
      * @return
      */
-    List<ConfigVo> getCompanyConfig(String companyId);
+    List<ConfigVO> getCompanyConfig(String companyId);
 }
