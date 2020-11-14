@@ -33,5 +33,5 @@ public interface ParkingLotMapper extends BaseMapper<ParkingLot> {
      * @param after
      * @return
      */
-    Integer getParkingSpaceCount(String companyId, String parkId, long before, long after);
+    int getParkingSpaceCount(String companyId, String parkId, long before, long after);
 }

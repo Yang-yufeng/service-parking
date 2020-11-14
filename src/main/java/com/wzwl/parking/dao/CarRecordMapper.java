@@ -36,7 +36,7 @@ public interface CarRecordMapper extends BaseMapper<CarRecord> {
      * @param after
      * @return
      */
-    Integer getEntryCountByTime(@Param("companyId") String companyId, @Param("parkId")String parkId, @Param("before")long before, @Param("after")long after);
+    int getEntryCountByTime(@Param("companyId") String companyId, @Param("parkId")String parkId, @Param("before")long before, @Param("after")long after);
 
     /**
      * 获取昨日及今日的出场上报记录
@@ -46,7 +46,7 @@ public interface CarRecordMapper extends BaseMapper<CarRecord> {
      * @param after
      * @return
      */
-    Integer getExitCountByTime(@Param("companyId") String companyId, @Param("parkId")String parkId, @Param("before")long before, @Param("after")long after);
+    int getExitCountByTime(@Param("companyId") String companyId, @Param("parkId")String parkId, @Param("before")long before, @Param("after")long after);
 
     /**
      * 入场开闸统计

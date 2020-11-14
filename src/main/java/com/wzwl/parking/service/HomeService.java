@@ -17,5 +17,5 @@ public interface HomeService {
      * @param parkId
      * @return
      */
-    ResultEntity getData(String companyId, String parkId);
+    String getData(String companyId, String parkId);
 }
