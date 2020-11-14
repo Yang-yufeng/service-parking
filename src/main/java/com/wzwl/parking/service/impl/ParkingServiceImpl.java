@@ -291,5 +291,10 @@ public class ParkingServiceImpl implements ParkingService {
         return result.toString();
     }
 
+    @Override
+    public String listPassages(String companyId, Integer page, Integer pageSize) {
+        return null;
+    }
+
 
 }

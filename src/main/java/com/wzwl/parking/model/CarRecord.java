@@ -38,6 +38,9 @@ public class CarRecord {
   /**入场图片URL**/
   private String entryImage;
 
+  /**入场放行类型**/
+  private Integer entryPassType;
+
   /**入口名**/
   private String entryName;
 
@@ -49,6 +52,9 @@ public class CarRecord {
 
   /**出场图片URL**/
   private String exitImage;
+
+  /**出场放行类型**/
+  private Integer exitPassType;
 
   /**出口名**/
   private String exitName;

@@ -144,10 +144,24 @@ public class ParkingController {
         return parkingService.listCarRecord(companyId,page,pageSize,carNo,cardNo,exitTime);
     }
 
+    /**
+     * 查询停车场通道信息
+     * @param companyId 企业ID
+     * @param page 分页数
+     * @param pageSize 每页返回最大记录数
+     * @return
+     */
+    @RequestMapping("/listPassages")
+    public String listPassages(@RequestParam String companyId,@RequestParam(defaultValue="1") Integer page,
+                               @RequestParam(defaultValue="10") Integer pageSize){
+        return parkingService.listPassages(companyId,page,pageSize);
+    }
+
     @RequestMapping("/export")
     public String export(String companyId, HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
         return parkingService.export(companyId,request,response);
     }
+
 
 
 

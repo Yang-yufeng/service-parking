@@ -114,4 +114,14 @@ public interface ParkingService  {
      * @return
      */
     String export(String companyId, HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException;
+
+
+    /**
+     * 查询设备列表
+     * @param companyId 企业ID
+     * @param page 分页数
+     * @param pageSize 每页返回最大记录数
+     * @return
+     */
+    String listPassages( String companyId, Integer page,Integer pageSize);
 }
