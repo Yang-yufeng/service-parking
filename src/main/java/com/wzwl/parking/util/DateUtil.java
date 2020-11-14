@@ -8,7 +8,7 @@ import java.util.SimpleTimeZone;
 
 /**
  * @ClassName DateUtil
- * @Description TODO
+ * @Description 日期处理工具类
  * @Author huff
  * @Date 2020/11/14 11:22
  * @Version 1.0
@@ -17,15 +17,29 @@ public class DateUtil {
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+
+    public static int dateToStamp(String dateString, String format) throws ParseException {
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat(format);
+        Date date=simpleDateFormat.parse(dateString);
+        return (int) (date.getTime() / 1000);
+    }
+
+    public static String stampToDate(long timestamp, String format) {
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat(format);
+        Date date=new Date(timestamp);
+        return simpleDateFormat.format(date);
+    }
+
+
     /**
-     * 获取指定日期(yyyy-MM-dd)凌晨毫秒数   //todo  待完善
+     * 获取指定日期(yyyy-MM-dd)凌晨毫秒数
      * @return
      */
     public static long getEarlyMorning(int year,int month,int day){
         Calendar calendar = Calendar.getInstance();
         calendar.clear();
         calendar.set(year,month,day,00,00,00);
-        long millis = calendar.getTimeInMillis();
+        long millis = calendar.getTimeInMillis()/1000;
         return millis;
     }
 
@@ -42,13 +56,9 @@ public class DateUtil {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return calendar.getTimeInMillis();
+        return calendar.getTimeInMillis()/1000;
     }
 
-    public static void main(String[] args) {
-        System.out.println(getEarlyMorning(2020,9,2));
-        System.out.println(getTimeStampByString("2020-09-02 00:00:00"));
-    }
 
 
 }
