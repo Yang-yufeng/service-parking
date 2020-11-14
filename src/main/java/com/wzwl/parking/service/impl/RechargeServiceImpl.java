@@ -6,6 +6,7 @@ import com.wzwl.parking.dao.RechargeMapper;
 import com.wzwl.parking.dto.RechargeRecordDTO;
 import com.wzwl.parking.model.RechargeRecord;
 import com.wzwl.parking.service.RechargeService;
+import com.wzwl.parking.util.DateUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,9 @@ public class RechargeServiceImpl implements RechargeService {
 
         RechargeRecord model = new RechargeRecord();
         BeanUtils.copyProperties(dto,model);
+        model.setValidFrom(DateUtil.getTimeStampByString(dto.getValidFrom()));
+        model.setValidTo(DateUtil.getTimeStampByString(dto.getValidTo()));
+        model.setCreateTime(DateUtil.getTimeStampByString(dto.getCreateTime()));
         int flag = rechargeMapper.insert(model);
         ResultEntity result;
         if (flag==1){

@@ -63,19 +63,19 @@ public class RechargeRecord {
     private Integer freeNumber;
 
     /**
-     * 充值开始时间建议00:00:00(yyyy-MM-dd HH:mm:ss）
+     * 充值开始时间
      */
-    private String validFrom;
+    private long validFrom;
 
     /**
-     * 充值结束时间建议23:59:59(yyyy-MM-dd HH:mm:ss）
+     * 充值结束时间
      */
-    private String validTo;
+    private long validTo;
 
     /**
-     * 创建时间(格式：yyyy-MM-dd HH:mm:ss)
+     * 创建时间
      */
-    private String createTime;
+    private long createTime;
 
     /**
      * 备注

@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wzwl.parking.model.ParkingLot;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.Map;
+
 /**
  * @ClassName ParkingLotMapper
  * @Description 停车场DAO
@@ -21,4 +23,15 @@ public interface ParkingLotMapper extends BaseMapper<ParkingLot> {
      * @return
      */
    ParkingLot getParkingLotById(String companyId, String parkId);
+
+
+    /**
+     * 获取车位饱和率
+     * @param companyId
+     * @param parkId
+     * @param before
+     * @param after
+     * @return
+     */
+    Integer getParkingSpaceCount(String companyId, String parkId, long before, long after);
 }

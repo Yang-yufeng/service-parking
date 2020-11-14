@@ -14,7 +14,77 @@
             and card_no = #{cardNo}
         </if>
     </select>
+    <select id="getEntryCountByTime" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM t_parking_car_record
+        where 1=1
+        <if test="companyId != null and companyId != ''" >
+            and company_id = #{companyId,jdbcType=VARCHAR}
+        </if>
+        <if test="parkId != null and parkId != ''">
+            and park_id = #{parkId,jdbcType=VARCHAR}
+        </if>
+        <if test="before != null">
+            and entry_time &gt;= #{before,jdbcType=INTEGER}
+        </if>
+        <if test="after != null">
+            and entry_time &lt; #{after,jdbcType=INTEGER}
+        </if>
 
+    </select>
+    <select id="getExitCountByTime" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM t_parking_car_record
+        where 1=1
+        <if test="companyId != null and companyId != ''" >
+            and company_id = #{companyId,jdbcType=VARCHAR}
+        </if>
+        <if test="parkId != null and parkId != ''">
+            and park_id = #{parkId,jdbcType=VARCHAR}
+        </if>
+        <if test="before != null">
+            and exit_time &gt;= #{before,jdbcType=INTEGER}
+        </if>
+        <if test="after != null">
+            and exit_time &lt; #{after,jdbcType=INTEGER}
+        </if>
+    </select>
 
+    <select id="getExitTypeCount" resultType="java.util.Map">
+        SELECT exit_pass_type,COUNT(exit_pass_type)
+        FROM t_parking_car_record
+        where 1=1
+        <if test="companyId != null and companyId != ''" >
+            and company_id = #{companyId,jdbcType=VARCHAR}
+        </if>
+        <if test="parkId != null and parkId != ''">
+            and park_id = #{parkId,jdbcType=VARCHAR}
+        </if>
+        <if test="before != null">
+            and exit_time &gt;= #{before,jdbcType=INTEGER}
+        </if>
+        <if test="after != null">
+            and exit_time &lt; #{after,jdbcType=INTEGER}
+        </if>
+	    GROUP BY exit_pass_type
+    </select>
 
+    <select id="getEntryTypeCount" resultType="java.util.Map">
+        SELECT entry_pass_type,COUNT(entry_pass_type)
+        FROM t_parking_car_record
+        where 1=1
+        <if test="companyId != null and companyId != ''" >
+            and company_id = #{companyId,jdbcType=VARCHAR}
+        </if>
+        <if test="parkId != null and parkId != ''">
+            and park_id = #{parkId,jdbcType=VARCHAR}
+        </if>
+        <if test="before != null">
+            and entry_time &gt;= #{before,jdbcType=INTEGER}
+        </if>
+        <if test="after != null">
+            and entry_time &lt; #{after,jdbcType=INTEGER}
+        </if>
+	    GROUP BY entry_pass_type
+    </select>
 </mapper>
