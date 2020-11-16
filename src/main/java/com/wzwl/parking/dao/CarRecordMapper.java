@@ -108,7 +108,17 @@ public interface CarRecordMapper extends BaseMapper<CarRecord> {
      * 查询时间段的缴费收益
      * @param startTime
      * @param endTime
+     * @param companyId
      * @return
      */
-    Integer getTimeCarCharge(Integer startTime,Integer endTime);
+    Integer getTimeCarCharge(Integer startTime,Integer endTime,String companyId);
+
+    /**
+     * 查询时间段的车流量
+     * @param startTime
+     * @param endTime
+     * @param companyId
+     * @return
+     */
+    Integer getTimeCarIn(Integer startTime,Integer endTime,String companyId);
 }

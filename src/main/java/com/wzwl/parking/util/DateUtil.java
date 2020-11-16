@@ -27,7 +27,7 @@ public class DateUtil {
 
     public static String stampToDate(long timestamp, String format) {
         SimpleDateFormat simpleDateFormat=new SimpleDateFormat(format);
-        Date date=new Date(timestamp);
+        Date date=new Date(timestamp*1000);
         return simpleDateFormat.format(date);
     }
 
@@ -63,14 +63,24 @@ public class DateUtil {
     }
 
     /**
-     * @return 当天的零点时间戳
+     * 获取当天时间戳
+     * @param hour 精确到小时 如9点10分，返回的是9点整的时间戳
+     * @param minute 精确到分
+     * @param second 精确到秒
+     * @return
      */
-    public static int getTodayStartTime() {
+    public static int getTodayStartTime(boolean hour,boolean minute,boolean second) {
         Calendar calendar=Calendar.getInstance();
         calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
+        if(!hour) {
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+        }
+        if(!minute) {
+            calendar.set(Calendar.MINUTE, 0);
+        }
+        if(!second) {
+            calendar.set(Calendar.SECOND, 0);
+        }
         return (int) (calendar.getTime().getTime() / 1000);
     }
 

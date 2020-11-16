@@ -145,4 +145,7 @@
     <select id="getTimeCarCharge" resultType="java.lang.Integer">
         SELECT sum(pay_money)  FROM t_parking_car_record where pay_time &gt;= ${startTime} and pay_time &lt; ${endTime}
     </select>
+    <select id="getTimeCarIn" resultType="Integer">
+        SELECT count(id)  FROM t_parking_car_record where entry_time &gt;= ${startTime} and entry_time &lt; ${endTime}
+    </select>
 </mapper>

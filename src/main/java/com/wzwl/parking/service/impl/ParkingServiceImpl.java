@@ -7,11 +7,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wzwl.parking.common.ResultEntity;
 import com.wzwl.parking.common.ResultEnum;
+import com.wzwl.parking.constants.TimeConstants;
 import com.wzwl.parking.dao.CarRecordMapper;
 import com.wzwl.parking.dao.ParkingLotMapper;
 import com.wzwl.parking.model.CarRecord;
 import com.wzwl.parking.model.ParkingLot;
 import com.wzwl.parking.service.ParkingService;
+import com.wzwl.parking.util.DateUtil;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +68,8 @@ public class ParkingServiceImpl implements ParkingService {
         record.setEntryName(entryName);
         record.setCardType(cardType);
         record.setEntryImage(entryImage);
-        record.setEntryPassType(entryPassType);
+        record.setEntryPassType(entryPassType!=null?entryPassType:0);
+        record.setExitPassType(0);
         record.setEntryPassRemark(entryPassRemark);
         carMapper.insert(record);
         //更新停车场剩余车位信息
@@ -93,16 +96,22 @@ public class ParkingServiceImpl implements ParkingService {
             record.setParkId(parkingLot.getId());
             record.setCarNo(carNo);
             record.setCardNo(cardNo);
+            record.setEntryTime(entryTime);
             record.setExitTime(exitTime);
             record.setExitName(exitName);
             record.setExitImage(exitImage);
-            record.setExitPassType(exitPassType);
+            record.setEntryPassType(0);
+            record.setExitPassType(exitPassType!=null?exitPassType:0);
             record.setExitPassRemark(exitPassRemark);
             carMapper.insert(record);
         }
+        record.setEntryTime(entryTime);
         record.setExitTime(exitTime);
         record.setExitName(exitName);
         record.setExitImage(exitImage);
+        record.setEntryPassType(0);
+        record.setExitPassType(exitPassType!=null?exitPassType:0);
+        record.setExitPassRemark(exitPassRemark);
         carMapper.updateById(record);
         //更新停车场剩余车位信息
 ///        parkingLot.setUseSpace(useSpace);
@@ -130,6 +139,8 @@ public class ParkingServiceImpl implements ParkingService {
             record.setCardNo(cardNo);
             record.setPayMoney(payMoney);
             record.setPayTime(payTime);
+            record.setExitPassType(0);
+            record.setEntryPassType(0);
             carMapper.insert(record);
         }
         record.setPayMoney(payMoney);
@@ -302,22 +313,61 @@ public class ParkingServiceImpl implements ParkingService {
     }
 
     @Override
-    public String carDataTrend(String companyId,int dayTimestamp) {
+    public String carDataTrend(String companyId,Integer dayTimestamp,Integer type,Integer startTime,Integer endTime) {
         JSONObject returnJson = new JSONObject();
-        //收费趋势
-        //天趋势,取24个点,1-24,1点数据为0-1（左闭右开）的数据,2点数据为1-2点的数据,以此类推.
-        JSONArray chargeHourTrendArray = new JSONArray();
-        int dayHours = 24;
-        for(int i=1;i<=dayHours;i++){
-            JSONObject timeChargeJson=new JSONObject();
-            Integer sumCharge = carMapper.getTimeCarCharge(dayTimestamp+3600*(i-1),dayTimestamp+3600*i);
-            timeChargeJson.put(i+"" , sumCharge==null?0:sumCharge);
-            chargeHourTrendArray.add(timeChargeJson);
+        JSONArray chargeTrendArray=new JSONArray();
+        JSONArray carInTrendArray = new JSONArray();
+        int points = 0;
+        int pointInterval=0;
+        if(type==TimeConstants.DAY_TREND_TYPE) {
+            //天趋势时，以当前时间（整点）+1为终点，向前推24小时，如现在1点30分，以2点为终点向前推24小时，取点间隔15min
+            dayTimestamp=DateUtil.getTodayStartTime(true, false, false) + 3600 - 86400;
+            pointInterval=TimeConstants.DAY_TREND_POINTS_INTERVAL;
+            points=24 * (3600 / pointInterval);
         }
-        returnJson.put("hourTrend",chargeHourTrendArray);
-        //周趋势,取7个点,每个点为一周的每天数据
-        //
+        if(type==TimeConstants.WEEK_TREND_TYPE){
+            //周趋势时，以当前时间（整点）+1为终点，向前推7*24小时，如现在1点30分，以2点为终点向前推7*24小时，取点间隔2h
+            dayTimestamp=DateUtil.getTodayStartTime(true, false, false) + 3600 - 86400*7;
+            pointInterval=TimeConstants.WEEK_TREND_POINTS_INTERVAL;
+            points=7 * (86400 / pointInterval);
+        }
+        if(type==TimeConstants.MONTH_TREND_TYPE){
+            //月趋势时，以当前时间（整点）+1为终点，向前推30*24小时，如现在1点30分，以2点为终点向前推30*24小时，取点间隔6h
+            dayTimestamp=DateUtil.getTodayStartTime(true, false, false) + 3600 - 86400*30;
+            pointInterval=TimeConstants.MONTH_TREND_POINTS_INTERVAL;
+            points=30 * (86400 / pointInterval);
+        }
+        if(type==TimeConstants.YEAR_TREND_TYPE){
+            //年趋势时，以当前时间（整点）+1为终点，向前推360*24小时，如现在1点30分，以2点为终点向前推7*24小时，取点间隔3d
+            dayTimestamp=DateUtil.getTodayStartTime(false, false, false) - 86400*360;
+            pointInterval=TimeConstants.YEAR_TREND_POINTS_INTERVAL;
+            points=360*86400/pointInterval;
+        }
+        if(type==TimeConstants.DEFINE_TREND_TYPE){
+            //自定义选择时间段时，固定返回100个点数据
+            points = 100;
+            pointInterval = (endTime-startTime)/100;
+            dayTimestamp = startTime;
+        }
+        for (int i=1; i <= points; i++) {
+            JSONObject timeChargeJson=new JSONObject();
+            JSONObject timeCarInJson=new JSONObject();
+            //开始时间
+            int computeStartTime = dayTimestamp + pointInterval * (i - 1);
+            int computeEndTime = dayTimestamp + pointInterval * i ;
+            Integer sumCharge=carMapper.getTimeCarCharge(computeStartTime, computeEndTime,companyId);
+            Integer countCarIn  = carMapper.getTimeCarIn(computeStartTime,computeEndTime,companyId);
+            timeChargeJson.put(DateUtil.stampToDate(computeEndTime,"yyyy-MM-dd HH:mm"),
+                    sumCharge == null ? 0 : sumCharge);
+            timeCarInJson.put(DateUtil.stampToDate(computeEndTime,"yyyy-MM-dd HH:mm"),
+                    countCarIn == null ? 0 : countCarIn);
+            chargeTrendArray.add(timeChargeJson);
+            carInTrendArray.add(timeCarInJson);
+        }
         ResultEntity result = new ResultEntity(ResultEnum.SUCCESS);
+        returnJson.put("chargeTrend", chargeTrendArray);
+        returnJson.put("carInTrend", carInTrendArray);
+        returnJson.put("points", points);
         result.setData(returnJson);
         return result.toString();
     }
