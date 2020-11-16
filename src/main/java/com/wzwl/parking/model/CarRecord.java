@@ -41,6 +41,9 @@ public class CarRecord {
   /**入场放行类型**/
   private Integer entryPassType;
 
+  /**入场放行说明**/
+  private String entryPassRemark;
+
   /**入口名**/
   private String entryName;
 
@@ -56,6 +59,9 @@ public class CarRecord {
   /**出场放行类型**/
   private Integer exitPassType;
 
+  /**出场放行说明**/
+  private String exitPassRemark;
+
   /**出口名**/
   private String exitName;
 
@@ -64,5 +70,16 @@ public class CarRecord {
 
   /**支付金额，单位：分**/
   private Integer payMoney;
+
+  /**停车场总车位**/
+  private Integer totalSpace;
+
+  /**已用车位数**/
+  private Integer useSpace;
+
+  /**空闲车位数**/
+  private Integer freeSpace;
+
+
 
 }

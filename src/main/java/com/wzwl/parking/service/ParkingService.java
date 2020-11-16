@@ -28,8 +28,8 @@ public interface ParkingService  {
      * @param useSpace 已用车位
      * @return
      */
-    String carIn( String companyId, String parkId, String carNo, String cardNo, Integer entryTime,
-                  String entryName, Integer cardType, String entryImage,Integer useSpace);
+    String carIn( String companyId, String parkId, String carNo, String cardNo, Integer entryTime, String entryName,
+                  Integer cardType, String entryImage,Integer useSpace,Integer entryPassType,String entryPassRemark);
 
     /**
      * 车辆出场
@@ -45,7 +45,7 @@ public interface ParkingService  {
      * @return
      */
     String carOut( String companyId, String parkId,String carNo, String cardNo, Integer entryTime, Integer exitTime,
-                   String exitName, String exitImage,Integer useSpace);
+                   String exitName, String exitImage,Integer useSpace,Integer exitPassType,String exitPassRemark);
 
     /**
      * 车辆缴费记录
@@ -124,4 +124,15 @@ public interface ParkingService  {
      * @return
      */
     String listPassages( String companyId, Integer page,Integer pageSize);
+
+    /**
+     * 车辆数据趋势（曲线数据）
+     * @param companyId 企业ID
+     * @param dayTimestamp 目标日期0点时间戳
+     * @return
+     */
+    String carDataTrend(String companyId,int dayTimestamp);
+
+
+
 }

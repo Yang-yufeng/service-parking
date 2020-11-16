@@ -25,14 +25,14 @@ public class ServiceParkingApplicationTests {
     @Test
     public void testCarIn(){
        String result =  parkingService.carIn("zz","ketuoId1","粤MJ9176",null,
-               10086, "入口1",1,null,100);
+               10086, "入口1",1,null,100,null,null);
        System.out.println(result);
     }
 
     @Test
     public void testCarOut(){
         String result =  parkingService.carOut("zz","ketuoId1","粤MJ9176",null,
-                10086,100020,"出口1",null,99);
+                10086,100020,"出口1",null,99,null,null);
         System.out.println(result);
     }
 

@@ -41,9 +41,9 @@ public class ParkingController {
     public String carIn(@RequestParam String companyId, @RequestParam String parkId,
                         String carNo,String cardNo, @RequestParam Integer entryTime,
                         @RequestParam String entryName, @RequestParam Integer cardType,
-                        String entryImage,@RequestParam Integer useSpace){
+                        String entryImage,@RequestParam Integer useSpace,Integer entryPassType,String entryPassRemark){
         return parkingService.carIn(companyId,parkId,carNo,cardNo,entryTime,entryName,cardType,
-                entryImage,useSpace);
+                entryImage,useSpace,entryPassType,entryPassRemark);
     }
 
     /**
@@ -63,8 +63,9 @@ public class ParkingController {
     public String carOut(@RequestParam String companyId, @RequestParam String parkId,
                          @RequestParam Integer entryTime, @RequestParam Integer exitTime,
                          @RequestParam String exitName, String exitImage,String carNo, String cardNo,
-                         @RequestParam Integer useSpace){
-        return parkingService.carOut(companyId,parkId,carNo,cardNo,entryTime,exitTime,exitName,exitImage,useSpace);
+                         @RequestParam Integer useSpace,Integer exitPassType,String exitPassRemark){
+        return parkingService.carOut(companyId,parkId,carNo,cardNo,entryTime,exitTime,exitName,exitImage,useSpace,exitPassType,
+                exitPassRemark);
     }
 
     /**

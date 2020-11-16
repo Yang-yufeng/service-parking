@@ -1,5 +1,6 @@
 package com.wzwl.parking.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -42,8 +43,8 @@ public class ParkingServiceImpl implements ParkingService {
 
     @Override
     @Transactional(rollbackFor=Exception.class)
-    public String carIn(String companyId, String parkId, String carNo, String cardNo, Integer entryTime,
-                        String entryName, Integer cardType, String entryImage, Integer useSpace) {
+    public String carIn(String companyId, String parkId, String carNo, String cardNo, Integer entryTime, String entryName, Integer cardType,
+                        String entryImage, Integer useSpace,Integer entryPassType,String entryPassRemark) {
         ParkingLot parkingLot = parkingLotMapper.getParkingLotById(companyId,parkId);
         if(parkingLot==null){
             ResultEntity result = new ResultEntity(ResultEnum.PARKINGLOT_NOT_EXISTED);
@@ -65,6 +66,8 @@ public class ParkingServiceImpl implements ParkingService {
         record.setEntryName(entryName);
         record.setCardType(cardType);
         record.setEntryImage(entryImage);
+        record.setEntryPassType(entryPassType);
+        record.setEntryPassRemark(entryPassRemark);
         carMapper.insert(record);
         //更新停车场剩余车位信息
         parkingLot.setUseSpace(useSpace);
@@ -76,8 +79,8 @@ public class ParkingServiceImpl implements ParkingService {
 
     @Override
     @Transactional(rollbackFor=Exception.class)
-    public String carOut(String companyId, String parkId, String carNo, String cardNo, Integer entryTime,
-                         Integer exitTime, String exitName, String exitImage, Integer useSpace) {
+    public String carOut(String companyId, String parkId, String carNo, String cardNo, Integer entryTime,  Integer exitTime,
+                         String exitName, String exitImage, Integer useSpace,Integer exitPassType,String exitPassRemark) {
         ParkingLot parkingLot = parkingLotMapper.getParkingLotById(companyId,parkId);
         if(parkingLot==null){
             ResultEntity result = new ResultEntity(ResultEnum.PARKINGLOT_NOT_EXISTED);
@@ -93,6 +96,8 @@ public class ParkingServiceImpl implements ParkingService {
             record.setExitTime(exitTime);
             record.setExitName(exitName);
             record.setExitImage(exitImage);
+            record.setExitPassType(exitPassType);
+            record.setExitPassRemark(exitPassRemark);
             carMapper.insert(record);
         }
         record.setExitTime(exitTime);
@@ -294,6 +299,27 @@ public class ParkingServiceImpl implements ParkingService {
     @Override
     public String listPassages(String companyId, Integer page, Integer pageSize) {
         return null;
+    }
+
+    @Override
+    public String carDataTrend(String companyId,int dayTimestamp) {
+        JSONObject returnJson = new JSONObject();
+        //收费趋势
+        //天趋势,取24个点,1-24,1点数据为0-1（左闭右开）的数据,2点数据为1-2点的数据,以此类推.
+        JSONArray chargeHourTrendArray = new JSONArray();
+        int dayHours = 24;
+        for(int i=1;i<=dayHours;i++){
+            JSONObject timeChargeJson=new JSONObject();
+            Integer sumCharge = carMapper.getTimeCarCharge(dayTimestamp+3600*(i-1),dayTimestamp+3600*i);
+            timeChargeJson.put(i+"" , sumCharge==null?0:sumCharge);
+            chargeHourTrendArray.add(timeChargeJson);
+        }
+        returnJson.put("hourTrend",chargeHourTrendArray);
+        //周趋势,取7个点,每个点为一周的每天数据
+        //
+        ResultEntity result = new ResultEntity(ResultEnum.SUCCESS);
+        result.setData(returnJson);
+        return result.toString();
     }
 
 

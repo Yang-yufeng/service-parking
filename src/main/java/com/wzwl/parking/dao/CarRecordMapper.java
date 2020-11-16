@@ -69,4 +69,12 @@ public interface CarRecordMapper extends BaseMapper<CarRecord> {
      */
     Map<String, Integer> getExitTypeCount(@Param("companyId") String companyId, @Param("parkId")String parkId,
                                           @Param("before")long before, @Param("after")long after);
+
+    /**
+     * 查询时间段的缴费收益
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    Integer getTimeCarCharge(Integer startTime,Integer endTime);
 }
