@@ -5,6 +5,7 @@ import com.wzwl.parking.model.CarRecord;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,6 +28,17 @@ public interface CarRecordMapper extends BaseMapper<CarRecord> {
      */
     CarRecord getCarRecordByEntryTime(@Param("carNo") String carNo,@Param("cardNo")String cardNo, int entryTime,
     String companyId);
+
+    /**
+     * 获取首页昨日及今日缴费记录
+     * @param companyId
+     * @param parkId
+     * @param before
+     * @param after
+     * @return
+     */
+    int getDailyFee(@Param("companyId") String companyId, @Param("parkId")String parkId,
+                    @Param("before")long before,@Param("after")long after);
 
     /**
      * 获取昨日及今日的获取进场上报记录
@@ -56,7 +68,7 @@ public interface CarRecordMapper extends BaseMapper<CarRecord> {
      * @param after
      * @return
      */
-    Map<String, Integer> getEntryTypeCount(@Param("companyId") String companyId, @Param("parkId")String parkId,
+    List<Map<String,Object>> getEntryTypeCount(@Param("companyId") String companyId, @Param("parkId")String parkId,
                                            @Param("before")long before, @Param("after")long after);
 
     /**
@@ -67,8 +79,30 @@ public interface CarRecordMapper extends BaseMapper<CarRecord> {
      * @param after
      * @return
      */
-    Map<String, Integer> getExitTypeCount(@Param("companyId") String companyId, @Param("parkId")String parkId,
-                                          @Param("before")long before, @Param("after")long after);
+    List<Map<String,Object>> getExitTypeCount(@Param("companyId") String companyId, @Param("parkId")String parkId,
+                                               @Param("before")long before, @Param("after")long after);
+
+    /**
+     * 获取车位占有数
+     * @param companyId
+     * @param parkId
+     * @param before
+     * @param after
+     * @return
+     */
+    Integer getParkingSpaceUse(@Param("companyId") String companyId, @Param("parkId")String parkId,
+                               @Param("before")long before, @Param("after")long after);
+
+    /**
+     * 获取车场总车位数
+     * @param companyId
+     * @param parkId
+     * @param before
+     * @param after
+     * @return
+     */
+    Integer getParkingSpaceCount(@Param("companyId") String companyId, @Param("parkId")String parkId,
+                                 @Param("before")long before, @Param("after")long after);
 
     /**
      * 查询时间段的缴费收益

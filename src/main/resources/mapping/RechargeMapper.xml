@@ -3,25 +3,7 @@
 <mapper namespace="com.wzwl.parking.dao.RechargeMapper">
 
     <select id = "getMonthlyFee"  resultType = "java.lang.Integer">
-        SELECT count(amount)
-        FROM t_parking_recharge_info_post
-        where 1=1
-        <if test="companyId != null and companyId != ''" >
-            and company_id = #{companyId,jdbcType=VARCHAR}
-        </if>
-        <if test="parkId != null and parkId != ''">
-            and park_id = #{parkId,jdbcType=VARCHAR}
-        </if>
-        <if test="before != null">
-            and create_time &gt;= #{before,jdbcType=INTEGER}
-        </if>
-        <if test="after != null">
-            and create_time &lt; #{after,jdbcType=INTEGER}
-        </if>
-    </select>
-
-    <select id="getDailyFee" resultType="java.lang.Integer">
-        SELECT count(amount)
+        SELECT COALESCE(SUM(amount),0)
         FROM t_parking_recharge_info_post
         where 1=1
         <if test="companyId != null and companyId != ''" >

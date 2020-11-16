@@ -27,15 +27,4 @@ public interface RechargeMapper extends BaseMapper<RechargeRecord> {
                       @Param("before")long before, @Param("after")long after);
 
 
-    /**
-     * 获取首页昨日及今日缴费记录
-     * @param companyId
-     * @param parkId
-     * @param before
-     * @param after
-     * @return
-     */
-    int getDailyFee(@Param("companyId") String companyId, @Param("parkId")String parkId,
-                    @Param("before")long before,@Param("after")long after);
-
 }

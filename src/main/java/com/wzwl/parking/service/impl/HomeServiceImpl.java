@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,9 +27,6 @@ import java.util.Map;
 
 @Service
 public class HomeServiceImpl implements HomeService {
-
-    @Resource
-    private ParkingLotMapper parkingLotMapper;
 
     @Resource
     private CarRecordMapper carRecordMapper;
@@ -60,8 +59,8 @@ public class HomeServiceImpl implements HomeService {
         int todayMonthlyFee = rechargeMapper.getMonthlyFee(companyId,parkId,today,tomorrow);
 
         //获取今日缴费记录（昨日及今日）
-        int yesterdayFee = rechargeMapper.getDailyFee(companyId,parkId,yesterday,today);
-        int todayFee = rechargeMapper.getDailyFee(companyId,parkId,today,tomorrow);
+        int yesterdayFee = carRecordMapper.getDailyFee(companyId,parkId,yesterday,today);
+        int todayFee = carRecordMapper.getDailyFee(companyId,parkId,today,tomorrow);
         //获得今日临停费用上升比率
         double todayFeeRate;
         if ((yesterdayMonthlyFee+yesterdayFee)==0){
@@ -113,12 +112,12 @@ public class HomeServiceImpl implements HomeService {
         carEntryAndExitCount.put("todayExitCount",todayExitCount);
         carEntryAndExitCount.put("todayExitRate",todayExitRate);
         //获取车位饱和率
-        int yesterdayHoldCount = parkingLotMapper.getParkingSpaceCount(companyId,parkId,yesterday,today);
-        int todayHoldCount = parkingLotMapper.getParkingSpaceCount(companyId,parkId,today,yesterday);
-        int parkingSpaceNum = parkingLotMapper.getParkingSpaceCount(companyId,parkId,today,yesterday);
+        Integer yesterdayHoldCount = carRecordMapper.getParkingSpaceUse(companyId,parkId,yesterday,System.currentTimeMillis()/1000-86400);
+        Integer todayHoldCount = carRecordMapper.getParkingSpaceUse(companyId,parkId,today,System.currentTimeMillis()/1000);
+        Integer parkingSpaceNum = carRecordMapper.getParkingSpaceCount(companyId,parkId,today,System.currentTimeMillis()/1000);
         double todayParkingSpaceRate = 0;
         double todayThanYesterdayRate = 0;
-        if (parkingSpaceNum==0){
+        if (parkingSpaceNum==null||parkingSpaceNum==0){
             todayParkingSpaceRate = 100.00;
             todayThanYesterdayRate = 100.00;
         }else {
@@ -133,22 +132,40 @@ public class HomeServiceImpl implements HomeService {
 
         //开闸统计
         JSONObject openGateCount = new JSONObject();
-        Map<String,Integer> todayExitTypeCount = carRecordMapper.getExitTypeCount(companyId,parkId,today,tomorrow);
-        Map<String,Integer> todayEntryTypeCount = carRecordMapper.getEntryTypeCount(companyId,parkId,today,tomorrow);
+        List<Map<String,Object>> todayExitTypeCount = carRecordMapper.getExitTypeCount(companyId,parkId,today,tomorrow);
+        List<Map<String,Object>> todayEntryTypeCount = carRecordMapper.getEntryTypeCount(companyId,parkId,today,tomorrow);
 
         int normalTypeCount = 0;
         int unNormalTypeCount = 0;
         int freeTypeCount = 0;
         int passTypeCountNum = 0;
-        if (todayExitTypeCount!=null){
-            normalTypeCount += todayExitTypeCount.get("0")==null?0:todayExitTypeCount.get("0");
-            unNormalTypeCount += todayExitTypeCount.get("2")==null?0:todayExitTypeCount.get("2");
-            freeTypeCount += todayExitTypeCount.get("1")==null?0:todayExitTypeCount.get("1");
+        Iterator exitIt = todayExitTypeCount.listIterator();
+        while (exitIt.hasNext()){
+            Map<String,Object> map = (Map<String, Object>) exitIt.next();
+            Integer exit_pass_type = (Integer) map.get("exit_pass_type");
+            if (exit_pass_type!=null){
+                if (exit_pass_type==0){
+                    normalTypeCount+=((BigDecimal)map.get("sum")).intValue();
+                }else if (exit_pass_type==1){
+                    freeTypeCount+=((BigDecimal)map.get("sum")).intValue();
+                }else if (exit_pass_type==2){
+                    unNormalTypeCount+=((BigDecimal)map.get("sum")).intValue();
+                }
+            }
         }
-        if (todayEntryTypeCount!=null){
-            normalTypeCount += todayEntryTypeCount.get("0")==null?0:todayEntryTypeCount.get("0");
-            unNormalTypeCount += todayEntryTypeCount.get("2")==null?0:todayEntryTypeCount.get("2");
-            freeTypeCount += todayEntryTypeCount.get("1")==null?0:todayEntryTypeCount.get("1");
+        Iterator entryIt = todayEntryTypeCount.listIterator();
+        while (entryIt.hasNext()){
+            Map<String,Object> map = (Map<String, Object>) entryIt.next();
+            Integer entry_pass_type = (Integer) map.get("entry_pass_type");
+            if (entry_pass_type!=null){
+                if (entry_pass_type==0){
+                    normalTypeCount+=((BigDecimal)map.get("sum")).intValue();
+                }else if (entry_pass_type==1){
+                    freeTypeCount+=((BigDecimal)map.get("sum")).intValue();
+                }else if (entry_pass_type==2){
+                    unNormalTypeCount+=((BigDecimal)map.get("sum")).intValue();
+                }
+            }
         }
         passTypeCountNum = normalTypeCount+unNormalTypeCount+freeTypeCount;
         openGateCount.put("normalTypeCount",normalTypeCount);

@@ -25,13 +25,5 @@ public interface ParkingLotMapper extends BaseMapper<ParkingLot> {
    ParkingLot getParkingLotById(String companyId, String parkId);
 
 
-    /**
-     * 获取车位饱和率
-     * @param companyId
-     * @param parkId
-     * @param before
-     * @param after
-     * @return
-     */
-    int getParkingSpaceCount(String companyId, String parkId, long before, long after);
+
 }
