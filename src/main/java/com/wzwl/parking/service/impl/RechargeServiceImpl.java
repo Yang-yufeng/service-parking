@@ -26,13 +26,32 @@ public class RechargeServiceImpl implements RechargeService {
     private RechargeMapper rechargeMapper;
 
     @Override
-    public String saveRechargeRecord(RechargeRecordDTO dto) {
+    public String saveRechargeRecord(String companyId,Integer parkId,Integer cardId, String orderNo,
+                                     Integer carType, Integer payChannel, Integer chargeMethod, Integer chargeNumber,
+                                     Integer amount, Integer freeNumber, String validFrom, String validTo,
+                                     String createTime,String remark, Integer rechargeType,Integer operationType,
+                                     String operator, String paySource) {
 
         RechargeRecord model = new RechargeRecord();
-        BeanUtils.copyProperties(dto,model);
-        model.setValidFrom(DateUtil.getTimeStampByString(dto.getValidFrom()));
-        model.setValidTo(DateUtil.getTimeStampByString(dto.getValidTo()));
-        model.setCreateTime(DateUtil.getTimeStampByString(dto.getCreateTime()));
+        //BeanUtils.copyProperties(dto,model);
+        model.setCompanyId(companyId);
+        model.setParkId(parkId);
+        model.setCardId(cardId);
+        model.setOrderNo(orderNo);
+        model.setCarType(carType);
+        model.setPayChannel(payChannel);
+        model.setChargeMethod(chargeMethod);
+        model.setChargeNumber(chargeNumber);
+        model.setAmount(amount);
+        model.setFreeNumber(freeNumber);
+        model.setValidFrom(DateUtil.getTimeStampByString(validFrom));
+        model.setValidTo(DateUtil.getTimeStampByString(validTo));
+        model.setCreateTime(DateUtil.getTimeStampByString(createTime));
+        model.setRemark(remark);
+        model.setRechargeType(rechargeType);
+        model.setOperationType(operationType);
+        model.setOperator(operator);
+        model.setPaySource(paySource);
         int flag = rechargeMapper.insert(model);
         ResultEntity result;
         if (flag==1){

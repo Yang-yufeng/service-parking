@@ -27,12 +27,12 @@ public class RechargeRecord {
     /**
      * 停车场ID
      */
-    private String parkId;
+    private Integer parkId;
 
     /**
      * 卡片ID
      */
-    private String cardId;
+    private Integer cardId;
 
     /**
      * 订单号
