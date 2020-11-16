@@ -30,7 +30,7 @@ public class RechargeController {
      * @param dto
      */
     @RequestMapping("/reportRecords")
-    public String getRechargeReportRecords(@RequestBody @Validated RechargeRecordDTO dto){
+    public String getRechargeReportRecords(@RequestBody RechargeRecordDTO dto){
 
        return rechargeService.saveRechargeRecord(dto);
 

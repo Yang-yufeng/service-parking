@@ -32,9 +32,7 @@ public class HomeController {
      */
     @RequestMapping("/getData")
     public String getData(@RequestParam String companyId,@RequestParam(required = false) String parkId){
-
         return homeService.getData(companyId,parkId);
-
     }
 
 
