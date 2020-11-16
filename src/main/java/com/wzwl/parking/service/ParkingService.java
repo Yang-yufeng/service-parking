@@ -126,12 +126,15 @@ public interface ParkingService  {
     String listPassages( String companyId, Integer page,Integer pageSize);
 
     /**
-     * 车辆数据趋势（曲线数据）
+     * 车辆数据趋势
      * @param companyId 企业ID
-     * @param dayTimestamp 目标日期0点时间戳
+     * @param dayTimestamp 时间戳
+     * @param type 类型（1：过去24小时，2：过去1周，3：过去30天，4：过去一年，5：自定义选择时间
+     * @param startTime 自定义开始时间
+     * @param endTime 自定义结束时间
      * @return
      */
-    String carDataTrend(String companyId,int dayTimestamp);
+    String carDataTrend(String companyId,Integer dayTimestamp,Integer type,Integer startTime,Integer endTime);
 
 
 

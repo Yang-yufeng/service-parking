@@ -163,6 +163,21 @@ public class ParkingController {
         return parkingService.export(companyId,request,response);
     }
 
+    /**
+     * 车辆数据趋势统计
+     * @param companyId
+     * @param type
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    @RequestMapping("/statistics")
+    public String carStatistics(@RequestParam String companyId,@RequestParam Integer type,Integer startTime,Integer endTime){
+        return parkingService.carDataTrend(companyId,null,type,startTime,endTime);
+    }
+
+
+
 
 
 
