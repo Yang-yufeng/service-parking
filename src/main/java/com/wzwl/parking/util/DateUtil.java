@@ -1,5 +1,6 @@
 package com.wzwl.parking.util;
 
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -72,6 +73,5 @@ public class DateUtil {
         calendar.set(Calendar.SECOND, 0);
         return (int) (calendar.getTime().getTime() / 1000);
     }
-
 
 }

@@ -9,9 +9,11 @@ import com.wzwl.parking.dao.RechargeMapper;
 import com.wzwl.parking.service.HomeService;
 import com.wzwl.parking.util.DateUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -41,9 +43,12 @@ public class HomeServiceImpl implements HomeService {
      * @return
      */
     @Override
+    @Transactional(rollbackFor=Exception.class)
     public String getData(String companyId, String parkId) {
 
         JSONObject resultData = new JSONObject();
+        NumberFormat percentFormat = NumberFormat.getPercentInstance();
+        percentFormat.setMaximumFractionDigits(2);
 
         //计算出今日凌晨、昨日凌晨、明日凌晨的时间戳
         Calendar now = Calendar.getInstance();
@@ -54,20 +59,51 @@ public class HomeServiceImpl implements HomeService {
         long tomorrow = DateUtil.getEarlyMorning(now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH));
 
         //获取月租车充值记录（昨日及今日）
+        JSONObject recharge =  getRechargeData(companyId, parkId, percentFormat, today, yesterday, tomorrow);
+        resultData.put("recharge",recharge);
+
+        //车辆出入统计
+        JSONObject carEntryAndExitCount = getCarInOutData(companyId, parkId, resultData, percentFormat, today, yesterday, tomorrow);
+        resultData.put("carEntryAndExitCount",carEntryAndExitCount);
+
+        //开闸统计
+        JSONObject openGateCount = getJsonObject(companyId, parkId, percentFormat, today, tomorrow);
+        resultData.put("openGateCount",openGateCount);
+
+        ResultEntity result = new ResultEntity(ResultEnum.SUCCESS);
+        result.setData(resultData);
+
+        return result.toString();
+    }
+
+
+
+
+    /**
+     * 获取运营金额数据（今日临停费用、今日月租车费用以及两者相较昨日的上升率）
+     * @param companyId
+     * @param parkId
+     * @param percentFormat
+     * @param today
+     * @param yesterday
+     * @param tomorrow
+     * @return
+     */
+    private JSONObject getRechargeData(String companyId, String parkId, NumberFormat percentFormat, long today, long yesterday, long tomorrow) {
         JSONObject recharge = new JSONObject();
-        int yesterdayMonthlyFee = rechargeMapper.getMonthlyFee(companyId,parkId,yesterday,today);
-        int todayMonthlyFee = rechargeMapper.getMonthlyFee(companyId,parkId,today,tomorrow);
+        int yesterdayMonthlyFee = rechargeMapper.getMonthlyFee(companyId, parkId, yesterday, today);
+        int todayMonthlyFee = rechargeMapper.getMonthlyFee(companyId, parkId, today, tomorrow);
 
         //获取今日缴费记录（昨日及今日）
-        int yesterdayFee = carRecordMapper.getDailyFee(companyId,parkId,yesterday,today);
-        int todayFee = carRecordMapper.getDailyFee(companyId,parkId,today,tomorrow);
+        int yesterdayTemporaryFee = carRecordMapper.getDailyFee(companyId, parkId, yesterday, today);
+        int todayTemporaryFee = carRecordMapper.getDailyFee(companyId, parkId, today, tomorrow);
         //获得今日临停费用上升比率
-        double todayFeeRate;
-        if ((yesterdayMonthlyFee+yesterdayFee)==0){
-            todayFeeRate = 100.00;
+        double todayTemporaryFeeRate;
+        if ((yesterdayMonthlyFee+yesterdayTemporaryFee)==0){
+            todayTemporaryFeeRate = 100.00;
         }else {
-            todayFeeRate = new BigDecimal((float)(todayMonthlyFee+todayFee-yesterdayMonthlyFee-yesterdayFee)/(yesterdayMonthlyFee+yesterdayFee))
-                    .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            todayTemporaryFeeRate = new BigDecimal((float)(todayMonthlyFee+todayTemporaryFee-yesterdayMonthlyFee-yesterdayTemporaryFee)/(yesterdayMonthlyFee+yesterdayTemporaryFee))
+                    .setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
         }
         //获得今日月租车费用上升比率
         double todayMonthlyFeeRate;
@@ -75,46 +111,58 @@ public class HomeServiceImpl implements HomeService {
             todayMonthlyFeeRate = 100.00;
         }else {
             todayMonthlyFeeRate = new BigDecimal((float)(todayMonthlyFee-yesterdayMonthlyFee)/(yesterdayMonthlyFee))
-                    .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    .setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
         }
-        recharge.put("todayFee",todayMonthlyFee+todayFee);
+        recharge.put("todayTemporaryFee",todayMonthlyFee+todayTemporaryFee);
         recharge.put("todayMonthlyFee",todayMonthlyFee);
-        recharge.put("todayFeeRate",todayFeeRate);
-        recharge.put("todayMonthlyFeeRate",todayMonthlyFeeRate);
-        resultData.put("recharge",recharge);
+        recharge.put("todayTemporaryFeeRate", percentFormat.format(todayTemporaryFeeRate));
+        recharge.put("todayMonthlyFeeRate", percentFormat.format(todayMonthlyFeeRate));
+        return recharge;
+    }
 
-        //车辆出入统计
+    /**
+     * 获得概览里车辆出入统计数据（今日入车、出车、车位饱和率以及相较昨日的比率）
+     * @param companyId
+     * @param parkId
+     * @param resultData
+     * @param percentFormat
+     * @param today
+     * @param yesterday
+     * @param tomorrow
+     * @return
+     */
+    private JSONObject getCarInOutData(String companyId, String parkId, JSONObject resultData, NumberFormat percentFormat, long today, long yesterday, long tomorrow) {
         JSONObject carEntryAndExitCount = new JSONObject();
         //获取进场上报记录（昨日及今日）
-        int yesterdayEntryCount = carRecordMapper.getEntryCountByTime(companyId,parkId,yesterday,today);
-        int todayEntryCount = carRecordMapper.getEntryCountByTime(companyId,parkId,today,tomorrow);
+        int yesterdayEntryCount = carRecordMapper.getEntryCountByTime(companyId, parkId, yesterday, today);
+        int todayEntryCount = carRecordMapper.getEntryCountByTime(companyId, parkId, today, tomorrow);
         //获取今日较昨日入车数量百分比
         double todayEntryRate;
         if (yesterdayEntryCount==0){
             todayEntryRate = 100.00;
         }else {
             todayEntryRate = new BigDecimal((float)(todayEntryCount-yesterdayEntryCount)/yesterdayEntryCount)
-                    .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    .setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
         }
         carEntryAndExitCount.put("todayEntryCount",todayEntryCount);
-        carEntryAndExitCount.put("todayEntryRate",todayEntryRate);
+        carEntryAndExitCount.put("todayEntryRate", percentFormat.format(todayEntryRate));
         //获取出场上报记录（昨日及今日）
-        int yesterdayExitCount = carRecordMapper.getExitCountByTime(companyId,parkId,yesterday,today);
-        int todayExitCount = carRecordMapper.getExitCountByTime(companyId,parkId,today,tomorrow);
+        int yesterdayExitCount = carRecordMapper.getExitCountByTime(companyId, parkId, yesterday, today);
+        int todayExitCount = carRecordMapper.getExitCountByTime(companyId, parkId, today, tomorrow);
         //获取今日较昨日入车数量百分比
         double todayExitRate;
         if (yesterdayExitCount==0){
             todayExitRate = 100.00;
         }else {
             todayExitRate = new BigDecimal((float)(todayExitCount-yesterdayExitCount)/yesterdayExitCount)
-                    .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    .setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
         }
         carEntryAndExitCount.put("todayExitCount",todayExitCount);
-        carEntryAndExitCount.put("todayExitRate",todayExitRate);
+        carEntryAndExitCount.put("todayExitRate", percentFormat.format(todayExitRate));
         //获取车位饱和率
-        Integer yesterdayHoldCount = carRecordMapper.getParkingSpaceUse(companyId,parkId,yesterday,System.currentTimeMillis()/1000-86400);
-        Integer todayHoldCount = carRecordMapper.getParkingSpaceUse(companyId,parkId,today,System.currentTimeMillis()/1000);
-        Integer parkingSpaceNum = carRecordMapper.getParkingSpaceCount(companyId,parkId,today,System.currentTimeMillis()/1000);
+        Integer yesterdayHoldCount = carRecordMapper.getParkingSpaceUse(companyId, parkId, yesterday,System.currentTimeMillis()/1000-86400);
+        Integer todayHoldCount = carRecordMapper.getParkingSpaceUse(companyId, parkId, today,System.currentTimeMillis()/1000);
+        Integer parkingSpaceNum = carRecordMapper.getParkingSpaceCount(companyId, parkId, today,System.currentTimeMillis()/1000);
         double todayParkingSpaceRate = 0;
         double todayThanYesterdayRate = 0;
         if (parkingSpaceNum==null||parkingSpaceNum==0){
@@ -122,18 +170,29 @@ public class HomeServiceImpl implements HomeService {
             todayThanYesterdayRate = 100.00;
         }else {
             todayParkingSpaceRate = new BigDecimal((float)todayHoldCount/parkingSpaceNum)
-                    .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    .setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
             todayThanYesterdayRate = new BigDecimal((float)(todayHoldCount-yesterdayHoldCount)/parkingSpaceNum)
-                    .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    .setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
         }
-        carEntryAndExitCount.put("todayParkingSpaceRate",todayParkingSpaceRate);
-        carEntryAndExitCount.put("todayThanYesterdayRate",todayThanYesterdayRate);
-        resultData.put("carEntryAndExitCount",carEntryAndExitCount);
+        carEntryAndExitCount.put("todayParkingSpaceRate", percentFormat.format(todayParkingSpaceRate));
+        carEntryAndExitCount.put("todayThanYesterdayRate", percentFormat.format(todayThanYesterdayRate));
 
-        //开闸统计
+        return carEntryAndExitCount;
+    }
+
+    /**
+     * 获得概览里开闸统计数据（正常、异常、免费以及相较总车位数的比率）
+     * @param companyId
+     * @param parkId
+     * @param percentFormat
+     * @param today
+     * @param tomorrow
+     * @return
+     */
+    private JSONObject getJsonObject(String companyId, String parkId, NumberFormat percentFormat, long today, long tomorrow) {
         JSONObject openGateCount = new JSONObject();
-        List<Map<String,Object>> todayExitTypeCount = carRecordMapper.getExitTypeCount(companyId,parkId,today,tomorrow);
-        List<Map<String,Object>> todayEntryTypeCount = carRecordMapper.getEntryTypeCount(companyId,parkId,today,tomorrow);
+        List<Map<String,Object>> todayExitTypeCount = carRecordMapper.getExitTypeCount(companyId, parkId, today, tomorrow);
+        List<Map<String,Object>> todayEntryTypeCount = carRecordMapper.getEntryTypeCount(companyId, parkId, today, tomorrow);
 
         int normalTypeCount = 0;
         int unNormalTypeCount = 0;
@@ -181,21 +240,16 @@ public class HomeServiceImpl implements HomeService {
             freeTypeCountRate = 0;
         }else {
             normalTypeCountRate = new BigDecimal((float)normalTypeCount/passTypeCountNum)
-                    .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    .setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
             unNormalTypeCountRate = new BigDecimal((float)unNormalTypeCount/passTypeCountNum)
-                    .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    .setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
             freeTypeCountRate = new BigDecimal((float)freeTypeCount/passTypeCountNum)
-                    .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+                    .setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
         }
-        openGateCount.put("normalTypeCountRate",normalTypeCountRate);
-        openGateCount.put("unNormalTypeCountRate",unNormalTypeCountRate);
-        openGateCount.put("freeTypeCountRate",freeTypeCountRate);
-        resultData.put("openGateCount",openGateCount);
-
-        ResultEntity result = new ResultEntity(ResultEnum.SUCCESS);
-        result.setData(resultData);
-
-        return result.toString();
+        openGateCount.put("normalTypeCountRate", percentFormat.format(normalTypeCountRate));
+        openGateCount.put("unNormalTypeCountRate", percentFormat.format(unNormalTypeCountRate));
+        openGateCount.put("freeTypeCountRate", percentFormat.format(freeTypeCountRate));
+        return openGateCount;
     }
 
 }
