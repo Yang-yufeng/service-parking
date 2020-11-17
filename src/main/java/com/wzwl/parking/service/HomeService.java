@@ -17,5 +17,11 @@ public interface HomeService {
      * @param parkId
      * @return
      */
-    String getData(String companyId, String parkId);
+    ResultEntity getData(String companyId, String parkId);
+
+    /**
+     * 获得车位总数，空闲车位数，以及剩余车位总数
+     * @return
+     */
+    ResultEntity getParkingSpaceInfo();
 }

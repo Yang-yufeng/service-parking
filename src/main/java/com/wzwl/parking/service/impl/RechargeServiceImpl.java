@@ -25,7 +25,7 @@ public class RechargeServiceImpl implements RechargeService {
     @Resource
     private RechargeMapper rechargeMapper;
 
-    @Override
+    /*@Override
     public String saveRechargeRecord(String companyId,Integer parkId,Integer cardId, String orderNo,
                                      Integer carType, Integer payChannel, Integer chargeMethod, Integer chargeNumber,
                                      Integer amount, Integer freeNumber, String validFrom, String validTo,
@@ -52,6 +52,24 @@ public class RechargeServiceImpl implements RechargeService {
         model.setOperationType(operationType);
         model.setOperator(operator);
         model.setPaySource(paySource);
+        int flag = rechargeMapper.insert(model);
+        ResultEntity result;
+        if (flag==1){
+            result =  new ResultEntity(ResultEnum.SUCCESS);
+        }else {
+            result = new ResultEntity(ResultEnum.SERVER_ERROR);
+        }
+        return result.toString();
+    }*/
+
+    @Override
+    public String saveRechargeRecord(RechargeRecordDTO dto) {
+        RechargeRecord model = new RechargeRecord();
+        BeanUtils.copyProperties(dto,model);
+        model.setValidFrom(DateUtil.getTimeStampByString(dto.getValidFrom()));
+        model.setValidTo(DateUtil.getTimeStampByString(dto.getValidTo()));
+        model.setCreateTime(DateUtil.getTimeStampByString(dto.getCreateTime()));
+
         int flag = rechargeMapper.insert(model);
         ResultEntity result;
         if (flag==1){
