@@ -1,5 +1,7 @@
 package com.wzwl.parking.dto;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -9,6 +11,7 @@ import javax.validation.constraints.NotNull;
  * @Date 2020/11/13 16:02
  * @Version 1.0
  */
+@Data
 public abstract class BaseDTO {
 
     @NotNull(message="appId不能为空")

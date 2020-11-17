@@ -31,8 +31,18 @@ public class HomeController {
      * @return
      */
     @RequestMapping("/getData")
-    public String getData(@RequestParam String companyId,@RequestParam(required = false) String parkId){
+    public ResultEntity getData(@RequestParam String companyId,@RequestParam(required = false) String parkId){
         return homeService.getData(companyId,parkId);
+    }
+
+
+    /**
+     * 获得车位总数，空闲车位数，以及剩余车位总数
+     * @return
+     */
+    @RequestMapping("/getParkingSpaceInfo")
+    public ResultEntity getParkingSpaceInfo(){
+        return homeService.getParkingSpaceInfo();
     }
 
 

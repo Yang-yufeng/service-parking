@@ -12,16 +12,18 @@ import com.wzwl.parking.model.RechargeRecord;
  */
 public interface RechargeService {
 
-
     /**
      * 保存固定车充值记录
      * @param
      */
-    String saveRechargeRecord(String companyId,Integer parkId,Integer cardId, String orderNo,
+    String saveRechargeRecord(RechargeRecordDTO dto);
+
+
+    /*String saveRechargeRecord(String companyId,Integer parkId,Integer cardId, String orderNo,
                               Integer carType, Integer payChannel, Integer chargeMethod, Integer chargeNumber,
                               Integer amount, Integer freeNumber, String validFrom, String validTo,
                               String createTime,String remark, Integer rechargeType,Integer operationType,
-                              String operator, String paySource);
+                              String operator, String paySource);*/
 
 
 }

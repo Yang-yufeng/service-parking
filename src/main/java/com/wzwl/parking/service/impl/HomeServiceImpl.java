@@ -1,5 +1,6 @@
 package com.wzwl.parking.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wzwl.parking.common.ResultEntity;
 import com.wzwl.parking.common.ResultEnum;
@@ -8,6 +9,7 @@ import com.wzwl.parking.dao.ParkingLotMapper;
 import com.wzwl.parking.dao.RechargeMapper;
 import com.wzwl.parking.service.HomeService;
 import com.wzwl.parking.util.DateUtil;
+import com.wzwl.parking.util.HttpUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +46,7 @@ public class HomeServiceImpl implements HomeService {
      */
     @Override
     @Transactional(rollbackFor=Exception.class)
-    public String getData(String companyId, String parkId) {
+    public ResultEntity getData(String companyId, String parkId) {
 
         JSONObject resultData = new JSONObject();
         NumberFormat percentFormat = NumberFormat.getPercentInstance();
@@ -63,7 +65,7 @@ public class HomeServiceImpl implements HomeService {
         resultData.put("recharge",recharge);
 
         //车辆出入统计
-        JSONObject carEntryAndExitCount = getCarInOutData(companyId, parkId, resultData, percentFormat, today, yesterday, tomorrow);
+        JSONObject carEntryAndExitCount = getCarInOutData(companyId, parkId, percentFormat, today, yesterday, tomorrow);
         resultData.put("carEntryAndExitCount",carEntryAndExitCount);
 
         //开闸统计
@@ -72,11 +74,35 @@ public class HomeServiceImpl implements HomeService {
 
         ResultEntity result = new ResultEntity(ResultEnum.SUCCESS);
         result.setData(resultData);
-
-        return result.toString();
+        return result;
     }
 
+    /**
+     * @return
+     */
+    @Override
+    public ResultEntity getParkingSpaceInfo() {
 
+        JSONObject response = HttpUtil.doPost("http://localhost:80/car/selectParkingSpace",new JSONObject());   //todo  配置信息获取
+        JSONObject result = new JSONObject();
+
+        JSONArray array = response.getJSONArray("data");
+        //JSONArray array = data.getJSONArray("data");
+        int totalSpaceNum = 0;
+        int freeSpaceNum = 0;
+
+        for (int i = 0; i < array.size(); i++) {
+            JSONObject jsonObject = (JSONObject) array.get(i);
+            totalSpaceNum+=jsonObject.getIntValue("totalSpaceNum");
+            freeSpaceNum+=jsonObject.getIntValue("freeSpaceNum");
+        }
+        result.put("totalSpaceNum",totalSpaceNum);
+        result.put("freeSpaceNum",freeSpaceNum);
+        result.put("occupySpaceNum",totalSpaceNum-freeSpaceNum);
+        ResultEntity entity = new ResultEntity(ResultEnum.SUCCESS);
+        entity.setData(result);
+        return entity;
+    }
 
 
     /**
@@ -124,14 +150,13 @@ public class HomeServiceImpl implements HomeService {
      * 获得概览里车辆出入统计数据（今日入车、出车、车位饱和率以及相较昨日的比率）
      * @param companyId
      * @param parkId
-     * @param resultData
      * @param percentFormat
      * @param today
      * @param yesterday
      * @param tomorrow
      * @return
      */
-    private JSONObject getCarInOutData(String companyId, String parkId, JSONObject resultData, NumberFormat percentFormat, long today, long yesterday, long tomorrow) {
+    private JSONObject getCarInOutData(String companyId, String parkId, NumberFormat percentFormat, long today, long yesterday, long tomorrow) {
         JSONObject carEntryAndExitCount = new JSONObject();
         //获取进场上报记录（昨日及今日）
         int yesterdayEntryCount = carRecordMapper.getEntryCountByTime(companyId, parkId, yesterday, today);
