@@ -23,7 +23,7 @@ public class CarSearchServiceImpl implements CarSearchService {
 
 
     @Override
-    public ResultEntity getCarLocalInfo(String plateNo, Integer pageIndex, Integer pageSize) {
+    public String getCarLocalInfo(String plateNo, Integer pageIndex, Integer pageSize) {
         JSONObject params = new JSONObject();
         params.put("plateNo",plateNo);
         params.put("pageIndex",pageIndex);
@@ -33,7 +33,7 @@ public class CarSearchServiceImpl implements CarSearchService {
         //List<CarLocalInfoVo> array = JSONObject.parseArray(response.toJSONString(), CarLocalInfoVo.class);
         ResultEntity entity = new ResultEntity(ResultEnum.SUCCESS);
         entity.setData(array);
-        return entity;
+        return entity.toString();
     }
 
 

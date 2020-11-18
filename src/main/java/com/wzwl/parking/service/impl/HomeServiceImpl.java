@@ -46,7 +46,7 @@ public class HomeServiceImpl implements HomeService {
      */
     @Override
     @Transactional(rollbackFor=Exception.class)
-    public ResultEntity getData(String companyId, String parkId) {
+    public String getData(String companyId, String parkId) {
 
         JSONObject resultData = new JSONObject();
         NumberFormat percentFormat = NumberFormat.getPercentInstance();
@@ -74,14 +74,14 @@ public class HomeServiceImpl implements HomeService {
 
         ResultEntity result = new ResultEntity(ResultEnum.SUCCESS);
         result.setData(resultData);
-        return result;
+        return result.toString();
     }
 
     /**
      * @return
      */
     @Override
-    public ResultEntity getParkingSpaceInfo() {
+    public String getParkingSpaceInfo() {
 
         JSONObject response = HttpUtil.doPost("http://localhost:80/car/selectParkingSpace",new JSONObject());   //todo  配置信息获取
         JSONObject result = new JSONObject();
@@ -101,7 +101,7 @@ public class HomeServiceImpl implements HomeService {
         result.put("occupySpaceNum",totalSpaceNum-freeSpaceNum);
         ResultEntity entity = new ResultEntity(ResultEnum.SUCCESS);
         entity.setData(result);
-        return entity;
+        return entity.toString();
     }
 
 

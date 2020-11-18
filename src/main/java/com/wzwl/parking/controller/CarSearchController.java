@@ -31,7 +31,7 @@ public class CarSearchController {
      * @return
      */
     @RequestMapping("/getCarLocalInfo")
-    public ResultEntity searchCar(@RequestParam(required = false) String plateNo,@RequestParam(defaultValue="1") Integer pageIndex,
+    public String searchCar(@RequestParam(required = false) String plateNo,@RequestParam(defaultValue="1") Integer pageIndex,
                                   @RequestParam(defaultValue="10") Integer pageSize){
         return carSearchService.getCarLocalInfo(plateNo,pageIndex,pageSize);
     }

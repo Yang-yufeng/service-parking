@@ -14,7 +14,8 @@ public interface RechargeService {
 
     /**
      * 保存固定车充值记录
-     * @param
+     * @param dto
+     * @return
      */
     String saveRechargeRecord(RechargeRecordDTO dto);
 

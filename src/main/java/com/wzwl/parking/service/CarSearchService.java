@@ -20,5 +20,5 @@ public interface CarSearchService {
      * @param pageSize
      * @return
      */
-    ResultEntity getCarLocalInfo(String plateNo, Integer pageIndex, Integer pageSize);
+    String getCarLocalInfo(String plateNo, Integer pageIndex, Integer pageSize);
 }

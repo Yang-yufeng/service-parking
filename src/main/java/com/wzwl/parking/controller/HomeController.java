@@ -31,7 +31,7 @@ public class HomeController {
      * @return
      */
     @RequestMapping("/getData")
-    public ResultEntity getData(@RequestParam String companyId,@RequestParam(required = false) String parkId){
+    public String getData(@RequestParam String companyId,@RequestParam(required = false) String parkId){
         return homeService.getData(companyId,parkId);
     }
 
@@ -41,7 +41,7 @@ public class HomeController {
      * @return
      */
     @RequestMapping("/getParkingSpaceInfo")
-    public ResultEntity getParkingSpaceInfo(){
+    public String getParkingSpaceInfo(){
         return homeService.getParkingSpaceInfo();
     }
 
