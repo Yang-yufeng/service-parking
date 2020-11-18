@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * @ClassName CarLocalInfoVo
- * @Description TODO
+ * @Description 寻车管理实体
  * @Author huff
  * @Date 2020/11/17 15:51
  * @Version 1.0

@@ -21,4 +21,14 @@ public interface CarSearchService {
      * @return
      */
     String getCarLocalInfo(String plateNo, Integer pageIndex, Integer pageSize);
+
+    /**
+     *
+     * @param days
+     * @param sortType
+     * @param pageIndex
+     * @param pageSize
+     * @return
+     */
+    String getLongParkingCarInfo(Integer days, Integer sortType, Integer pageIndex, Integer pageSize);
 }

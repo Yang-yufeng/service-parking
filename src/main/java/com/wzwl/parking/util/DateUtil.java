@@ -33,7 +33,7 @@ public class DateUtil {
 
 
     /**
-     * 获取指定日期(yyyy-MM-dd)凌晨毫秒数
+     * 获取指定日期(yyyy-MM-dd)凌晨秒数
      *
      * @return
      */
@@ -46,7 +46,7 @@ public class DateUtil {
     }
 
     /**
-     * 将日期字符串转换为毫秒数
+     * 将日期字符串转换为秒数
      *
      * @param dateStr yyyy-MM-dd HH:mm:ss
      * @return
@@ -84,4 +84,19 @@ public class DateUtil {
         return (int) (calendar.getTime().getTime() / 1000);
     }
 
+    /**
+     * 根据时间差计算得到的停车时长
+     * @param today
+     * @param entryTime
+     * @return  xx天xx小时
+     */
+    public static String getParkingTime(long today, Integer entryTime) {
+
+        long time = today - entryTime;
+        long days = time/86400;
+        long hour = time%86400/3600;
+        String result = days+"天"+hour+"小时";
+        return result;
+
+    }
 }

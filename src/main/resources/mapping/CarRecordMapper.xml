@@ -122,7 +122,7 @@
         <if test="after != null">
             and entry_time &lt; #{after,jdbcType=INTEGER}
         </if>
-        and entry_time is not null;
+        and entry_time&gt;0;
     </select>
     <select id="getParkingSpaceCount" resultType="java.lang.Integer">
         SELECT total_space
