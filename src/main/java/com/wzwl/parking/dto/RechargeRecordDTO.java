@@ -13,7 +13,14 @@ import javax.validation.constraints.NotNull;
  * @Version 1.0
  */
 @Data
-public class RechargeRecordDTO extends BaseDTO{
+public class RechargeRecordDTO {
+
+    /**
+     * 车场id
+     */
+    @NotNull(message="parkId不能为空")
+    private Integer parkId;
+
 
     /**
      * 公司ID
