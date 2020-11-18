@@ -13,6 +13,7 @@
         <if test="cardNo != null">
             and card_no = #{cardNo}
         </if>
+        limit 1
     </select>
     <select id="getDailyFee" resultType="java.lang.Integer">
         SELECT COALESCE(SUM(pay_money),0)

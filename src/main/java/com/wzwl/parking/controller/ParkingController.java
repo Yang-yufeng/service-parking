@@ -136,13 +136,15 @@ public class ParkingController {
      * @param pageSize 每页显示数据
      * @param carNo 车牌号
      * @param cardNo 卡号
-     * @param exitTime 出场时间
+     * @param startTime 开始时间（入场时间）
+     * @param endTime 结束时间（入场时间）
      * @return
      */
     @RequestMapping("/listCarRecords")
     public String listCarRecord(@RequestParam String companyId,@RequestParam(defaultValue="1") Integer page,
-                                 @RequestParam(defaultValue="10") Integer pageSize,String carNo,String cardNo,Integer exitTime){
-        return parkingService.listCarRecord(companyId,page,pageSize,carNo,cardNo,exitTime);
+                                 @RequestParam(defaultValue="10") Integer pageSize,String carNo,String cardNo,
+                                Integer startTime,Integer endTime){
+        return parkingService.listCarRecord(companyId,page,pageSize,carNo,cardNo,startTime,endTime);
     }
 
     /**

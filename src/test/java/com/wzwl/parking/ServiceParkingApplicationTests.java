@@ -60,7 +60,7 @@ public class ServiceParkingApplicationTests {
 
     @Test
     public void testCarRecordList(){
-        String result =  parkingService.listCarRecord("zz",1,3,"粤M",null,1);
+        String result =  parkingService.listCarRecord("zz",1,3,"粤M",null,1,1800000000);
         System.out.println(result);
     }
 
