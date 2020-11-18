@@ -21,7 +21,17 @@ public interface HomeService {
 
     /**
      * 获得车位总数，空闲车位数，以及剩余车位总数
+     * @param companyId
+     * @param parkId
      * @return
      */
-    String getParkingSpaceInfo();
+    String getParkingSpaceInfo(String companyId, String parkId);
+
+    /**
+     * 获得环境参数
+     * @param companyId
+     * @param parkId
+     * @return
+     */
+    String getEnvironmentInfo(String companyId, String parkId);
 }

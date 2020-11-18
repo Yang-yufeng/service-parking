@@ -41,9 +41,17 @@ public class HomeController {
      * @return
      */
     @RequestMapping("/getParkingSpaceInfo")
-    public String getParkingSpaceInfo(){
-        return homeService.getParkingSpaceInfo();
+    public String getParkingSpaceInfo(@RequestParam String companyId,@RequestParam(required = false) String parkId){
+        return homeService.getParkingSpaceInfo(companyId,parkId);
     }
 
+    /**
+     * 获得环境参数
+     * @return
+     */
+    @RequestMapping("/getEnvironmentInfo")
+    public String getEnvironmentInfo(@RequestParam String companyId,@RequestParam(required = false) String parkId){
+        return homeService.getEnvironmentInfo(companyId,parkId);
+    }
 
 }

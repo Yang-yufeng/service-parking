@@ -2,11 +2,16 @@ package com.wzwl.parking.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.wzwl.parking.common.ResultEntity;
 import com.wzwl.parking.common.ResultEnum;
 import com.wzwl.parking.dao.CarRecordMapper;
+import com.wzwl.parking.dao.EnvironmentMapper;
 import com.wzwl.parking.dao.ParkingLotMapper;
 import com.wzwl.parking.dao.RechargeMapper;
+import com.wzwl.parking.model.Environment;
 import com.wzwl.parking.service.HomeService;
 import com.wzwl.parking.util.DateUtil;
 import com.wzwl.parking.util.HttpUtil;
@@ -38,12 +43,10 @@ public class HomeServiceImpl implements HomeService {
     @Resource
     private RechargeMapper rechargeMapper;
 
-    /**
-     * 获取首页运营金额、出入统计、开闸统计的数据
-     * @param companyId
-     * @param parkId
-     * @return
-     */
+    @Resource
+    private EnvironmentMapper environmentMapper;
+
+
     @Override
     @Transactional(rollbackFor=Exception.class)
     public String getData(String companyId, String parkId) {
@@ -77,13 +80,14 @@ public class HomeServiceImpl implements HomeService {
         return result.toString();
     }
 
-    /**
-     * @return
-     */
-    @Override
-    public String getParkingSpaceInfo() {
 
-        JSONObject response = HttpUtil.doPost("http://localhost:80/car/selectParkingSpace",new JSONObject());   //todo  配置信息获取
+    @Override
+    public String getParkingSpaceInfo(String companyId, String parkId) {
+
+        JSONObject params = new JSONObject();
+        params.put("companyId",companyId);
+        params.put("parkId",parkId);
+        JSONObject response = HttpUtil.doPost("http://localhost:80/car/selectParkingSpace",params);   //todo  配置信息获取
         JSONObject result = new JSONObject();
 
         JSONArray array = response.getJSONArray("data");
@@ -101,6 +105,21 @@ public class HomeServiceImpl implements HomeService {
         result.put("occupySpaceNum",totalSpaceNum-freeSpaceNum);
         ResultEntity entity = new ResultEntity(ResultEnum.SUCCESS);
         entity.setData(result);
+        return entity.toString();
+    }
+
+    @Override
+    public String getEnvironmentInfo(String companyId, String parkId) {
+        QueryWrapper<Environment> wrapper = new QueryWrapper<>();
+        wrapper.eq("company_id",companyId);
+        if (StringUtils.isNotEmpty(parkId)){
+            wrapper.eq("park_id",parkId);
+        }
+        wrapper.orderByDesc("create_time");
+        wrapper.last("limit 1");
+        Environment model = environmentMapper.selectOne(wrapper);
+        ResultEntity entity = new ResultEntity(ResultEnum.SUCCESS);
+        entity.setData(model);
         return entity.toString();
     }
 
