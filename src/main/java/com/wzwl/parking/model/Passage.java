@@ -24,7 +24,7 @@ public class Passage {
   private String companyId;
 
   /**停车场ID**/
-  private String parkId;
+  private Integer parkId;
 
   /**通道编号**/
   private Integer code;

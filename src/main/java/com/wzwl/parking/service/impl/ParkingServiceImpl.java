@@ -1,5 +1,6 @@
 package com.wzwl.parking.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -7,13 +8,17 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wzwl.parking.common.ResultEntity;
 import com.wzwl.parking.common.ResultEnum;
+import com.wzwl.parking.constants.RequestUrlConstants;
 import com.wzwl.parking.constants.TimeConstants;
 import com.wzwl.parking.dao.CarRecordMapper;
 import com.wzwl.parking.dao.ParkingLotMapper;
+import com.wzwl.parking.dao.PassageMapper;
 import com.wzwl.parking.model.CarRecord;
 import com.wzwl.parking.model.ParkingLot;
+import com.wzwl.parking.model.Passage;
 import com.wzwl.parking.service.ParkingService;
 import com.wzwl.parking.util.DateUtil;
+import com.wzwl.parking.util.HttpUtil;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +30,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @ClassName ParkingServiceImpl
@@ -42,6 +50,9 @@ public class ParkingServiceImpl implements ParkingService {
 
     @Resource
     private ParkingLotMapper parkingLotMapper;
+
+    @Resource
+    private PassageMapper passageMapper;
 
     @Override
     @Transactional(rollbackFor=Exception.class)
@@ -313,7 +324,55 @@ public class ParkingServiceImpl implements ParkingService {
 
     @Override
     public String listPassages(String companyId, Integer page, Integer pageSize) {
-        return null;
+        {
+            QueryWrapper<Passage> queryWrapper =new QueryWrapper<>();
+            queryWrapper.eq("company_id",companyId);
+            IPage<Passage> passagesPage = new Page<>(page,pageSize);
+            passagesPage = passageMapper.selectPage(passagesPage,queryWrapper);
+            List<Passage> list = passagesPage.getRecords();
+            ResultEntity result = new ResultEntity(ResultEnum.SUCCESS);
+            //总记录数
+            long total = passagesPage.getTotal();
+            if(total==0){
+                //没有查询到记录从科拓Agent获取
+                //再将数据上报到上层应用
+                Map<String, Object> requestMap=new HashMap<String, Object>();
+                //reportMap.put("companyId", companyId);
+                requestMap.put("appId", "10156");
+                requestMap.put("parkId", 115);
+                requestMap.put("serviceCode", "getParkingNode");
+                requestMap.put("ts", System.currentTimeMillis()+"");
+                requestMap.put("reqId", UUID.randomUUID().toString().replace("-",""));
+                requestMap.put("pageIndex", page);
+                requestMap.put("pageSize", pageSize);
+                String response=HttpUtil.doPostRequest(RequestUrlConstants.GET_PASSAGES_URL, requestMap);
+                JSONObject responseJson =JSON.parseObject(response);
+                JSONArray passagesArray  = responseJson.getJSONObject("data").getJSONArray("nodeList");
+                for(int i=0;i<passagesArray.size();i++){
+                    JSONObject json =(JSONObject) passagesArray.get(i);
+                    Passage passage = new Passage();
+                    passage.setCode(json.getInteger("id"));
+                    passage.setCompanyId(companyId);
+                    passage.setParkId(115);
+                    passage.setIp(json.getString("nodeIp"));
+                    passage.setUseType(json.getInteger("useType"));
+                    passage.setName(json.getString("nodeName"));
+                    passageMapper.insert(passage);
+                }
+
+                System.out.println(response);
+            }
+            //当前页记录数
+            int current = list.size();
+            JSONObject json = new JSONObject();
+            json.put("total", total);
+            if(current>0) {
+                json.put("passagesList", list);
+            }
+            result.setData(json);
+            return  result.toString();
+
+        }
     }
 
     @Override
