@@ -83,7 +83,7 @@ public interface CarRecordMapper extends BaseMapper<CarRecord> {
                                                @Param("before")long before, @Param("after")long after);
 
     /**
-     * 获取车位占有数
+     * 获取进场上报总数
      * @param companyId
      * @param parkId
      * @param before

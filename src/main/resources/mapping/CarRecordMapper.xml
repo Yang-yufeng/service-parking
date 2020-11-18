@@ -107,7 +107,7 @@
     </select>
 
     <select id="getParkingSpaceUse" resultType="java.lang.Integer">
-        SELECT use_space
+        SELECT count(entry_time)
         FROM t_parking_car_record
         where 1=1
         <if test="companyId != null and companyId != ''" >
@@ -122,7 +122,7 @@
         <if test="after != null">
             and entry_time &lt; #{after,jdbcType=INTEGER}
         </if>
-        order by entry_time desc limit 1
+        and entry_time is not null;
     </select>
     <select id="getParkingSpaceCount" resultType="java.lang.Integer">
         SELECT total_space
