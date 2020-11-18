@@ -203,7 +203,7 @@ public class ParkingServiceImpl implements ParkingService {
     }
 
     @Override
-    public String listCarRecord(String companyId, Integer page, Integer pageSize, String carNo, String cardNo, Integer exitTime) {
+    public String listCarRecord(String companyId, Integer page, Integer pageSize, String carNo, String cardNo, Integer startTime,Integer endTime) {
         QueryWrapper<CarRecord> queryWrapper =new QueryWrapper<>();
         queryWrapper.eq("company_id",companyId);
         if(carNo!=null) {
@@ -212,9 +212,13 @@ public class ParkingServiceImpl implements ParkingService {
         if(cardNo!=null) {
             queryWrapper.like("card_no", cardNo);
         }
-        if(exitTime!=null) {
-            queryWrapper.ge("exit_time", exitTime);
+        if(startTime!=null) {
+            queryWrapper.ge("entry_time", startTime);
         }
+        if(endTime!=null) {
+            queryWrapper.le("entry_time", endTime);
+        }
+        queryWrapper.orderByDesc("entry_time");
         IPage<CarRecord> recordPage = new Page<>(page,pageSize);
         recordPage = carMapper.selectPage(recordPage,queryWrapper);
         List<CarRecord> list = recordPage.getRecords();

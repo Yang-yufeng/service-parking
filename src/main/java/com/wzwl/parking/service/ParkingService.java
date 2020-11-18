@@ -106,7 +106,7 @@ public interface ParkingService  {
      * @param exitTime 出场时间
      * @return
      */
-    String listCarRecord(String companyId, Integer page, Integer pageSize,String carNo,String cardNo,Integer exitTime);
+    String listCarRecord(String companyId, Integer page, Integer pageSize,String carNo,String cardNo,Integer startTime,Integer endTime);
 
     /**
      * 导出
