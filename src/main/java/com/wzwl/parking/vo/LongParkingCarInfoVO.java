@@ -1,6 +1,11 @@
 package com.wzwl.parking.vo;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @ClassName LongParkingCarInfoVO
@@ -10,7 +15,7 @@ import lombok.Data;
  * @Version 1.0
  */
 @Data
-public class LongParkingCarInfoVO {
+public class LongParkingCarInfoVO{
 
     /**
      * 车牌号码
@@ -25,7 +30,9 @@ public class LongParkingCarInfoVO {
     /**
      * 入场时间
      */
-    private Integer entryTime;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", locale = "zh", timezone = "GMT+8")//格式化日期
+    private Date entryTime;
 
     /**
      * 入口名称

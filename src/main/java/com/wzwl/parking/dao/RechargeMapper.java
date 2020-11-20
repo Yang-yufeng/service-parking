@@ -18,13 +18,11 @@ public interface RechargeMapper extends BaseMapper<RechargeRecord> {
     /**
      * 获取首页月租车昨日及今日充值记录
      * @param companyId
-     * @param parkId
      * @param before
      * @param after
      * @return
      */
-    int getMonthlyFee(@Param("companyId") String companyId, @Param("parkId")String parkId,
-                      @Param("before")long before, @Param("after")long after);
+    int getMonthlyFee(@Param("companyId") String companyId, @Param("before")long before, @Param("after")long after);
 
 
 }

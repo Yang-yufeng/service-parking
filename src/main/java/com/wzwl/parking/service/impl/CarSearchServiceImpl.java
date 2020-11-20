@@ -1,5 +1,6 @@
 package com.wzwl.parking.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -7,6 +8,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wzwl.parking.common.ResultEntity;
 import com.wzwl.parking.common.ResultEnum;
 import com.wzwl.parking.dao.CarRecordMapper;
+import com.wzwl.parking.dto.CarSearchDTO;
+import com.wzwl.parking.dto.LongParkingDTO;
 import com.wzwl.parking.model.CarRecord;
 import com.wzwl.parking.service.CarSearchService;
 import com.wzwl.parking.util.DateUtil;
@@ -37,24 +40,29 @@ public class CarSearchServiceImpl implements CarSearchService {
     CarRecordMapper carRecordMapper;
 
     @Override
-    public String getCarLocalInfo(String plateNo, Integer pageIndex, Integer pageSize) {
-        JSONObject params = new JSONObject();
-        params.put("plateNo",plateNo);
-        params.put("pageIndex",pageIndex);
-        params.put("pageSize",pageSize);
+    public String getCarLocalInfo(CarSearchDTO dto) {
+        JSONObject params = (JSONObject) JSON.toJSON(dto);
         JSONObject response = HttpUtil.doPost("http://localhost:80/car/getCarLocalInfo",params);   //todo  配置信息获取
-        List<CarLocalInfoVO> array = JSONObject.parseArray(response.getJSONArray("data").toJSONString(), CarLocalInfoVO.class);
-        //List<CarLocalInfoVo> array = JSONObject.parseArray(response.toJSONString(), CarLocalInfoVo.class);
+        List<CarLocalInfoVO> array = JSONObject.parseArray(response.getJSONObject("data").getJSONArray("data").toJSONString(), CarLocalInfoVO.class);
         ResultEntity entity = new ResultEntity(ResultEnum.SUCCESS);
         entity.setData(array);
         return entity.toString();
     }
 
     @Override
-    public String getLongParkingCarInfo(Integer days, Integer sortType, Integer pageIndex, Integer pageSize) {
+    public String getLongParkingCarInfo(LongParkingDTO dto) {
 
-        //todo  天数枚举暂时不处理
-
+        //需要计算的天数
+        int days = 0;
+        if (dto.getDays()==null){
+            if (dto.getType()==1){
+                days = 7;
+            }else{
+                days = 30;
+            }
+        }else {
+            days = dto.getDays();
+        }
 
         //当前时间秒数
         long today = DateUtil.getTimeStampByString(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
@@ -64,19 +72,20 @@ public class CarSearchServiceImpl implements CarSearchService {
         QueryWrapper<CarRecord> wrapper = new QueryWrapper<>();
         wrapper.lt("entry_time",before);
         wrapper.eq("exit_time",0);
-        if (sortType==1){
+        if (dto.getSortType()==1){
             wrapper.orderByDesc("entry_time");
         }else {
             wrapper.orderByAsc("entry_time");
         }
-        IPage<CarRecord> recordPage = new Page<>(pageIndex,pageSize);
+        IPage<CarRecord> recordPage = new Page<>(dto.getPageIndex(),dto.getPageSize());
         recordPage = carRecordMapper.selectPage(recordPage,wrapper);
         List<CarRecord> list = recordPage.getRecords();
         List<LongParkingCarInfoVO> data = new ArrayList<>();
         list.stream().forEach(e->{
             LongParkingCarInfoVO vo = new LongParkingCarInfoVO();
             BeanUtils.copyProperties(e,vo);
-            vo.setParkingTime(DateUtil.getParkingTime(today,vo.getEntryTime()));
+            vo.setParkingTime(DateUtil.getParkingTime(today,e.getEntryTime()));
+            vo.setEntryTime(new Date((long)e.getEntryTime()*1000));
             data.add(vo);
         });
 

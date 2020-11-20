@@ -22,9 +22,6 @@
         <if test="companyId != null and companyId != ''" >
             and company_id = #{companyId,jdbcType=VARCHAR}
         </if>
-        <if test="parkId != null and parkId != ''">
-            and park_id = #{parkId,jdbcType=VARCHAR}
-        </if>
         <if test="before != null">
             and pay_time &gt;= #{before,jdbcType=INTEGER}
         </if>
@@ -38,9 +35,6 @@
         where 1=1
         <if test="companyId != null and companyId != ''" >
             and company_id = #{companyId,jdbcType=VARCHAR}
-        </if>
-        <if test="parkId != null and parkId != ''">
-            and park_id = #{parkId,jdbcType=VARCHAR}
         </if>
         <if test="before != null">
             and entry_time &gt;= #{before,jdbcType=INTEGER}
@@ -57,9 +51,6 @@
         <if test="companyId != null and companyId != ''" >
             and company_id = #{companyId,jdbcType=VARCHAR}
         </if>
-        <if test="parkId != null and parkId != ''">
-            and park_id = #{parkId,jdbcType=VARCHAR}
-        </if>
         <if test="before != null">
             and exit_time &gt;= #{before,jdbcType=INTEGER}
         </if>
@@ -74,9 +65,6 @@
         where 1=1
         <if test="companyId != null and companyId != ''" >
             and company_id = #{companyId,jdbcType=VARCHAR}
-        </if>
-        <if test="parkId != null and parkId != ''">
-            and park_id = #{parkId,jdbcType=VARCHAR}
         </if>
         <if test="before != null">
             and exit_time &gt;= #{before,jdbcType=INTEGER}
@@ -94,9 +82,6 @@
         <if test="companyId != null and companyId != ''" >
             and company_id = #{companyId,jdbcType=VARCHAR}
         </if>
-        <if test="parkId != null and parkId != ''">
-            and park_id = #{parkId,jdbcType=VARCHAR}
-        </if>
         <if test="before != null">
             and entry_time &gt;= #{before,jdbcType=INTEGER}
         </if>
@@ -113,9 +98,6 @@
         <if test="companyId != null and companyId != ''" >
             and company_id = #{companyId,jdbcType=VARCHAR}
         </if>
-        <if test="parkId != null and parkId != ''">
-            and park_id = #{parkId,jdbcType=VARCHAR}
-        </if>
         <if test="before != null">
             and entry_time &gt;= #{before,jdbcType=INTEGER}
         </if>
@@ -131,9 +113,6 @@
         <if test="companyId != null and companyId != ''" >
             and company_id = #{companyId,jdbcType=VARCHAR}
         </if>
-        <if test="parkId != null and parkId != ''">
-            and park_id = #{parkId,jdbcType=VARCHAR}
-        </if>
         <if test="before != null">
             and entry_time &gt;= #{before,jdbcType=INTEGER}
         </if>
@@ -146,7 +125,7 @@
     <select id="getTimeCarCharge" resultType="java.lang.Integer">
         SELECT sum(pay_money)  FROM t_parking_car_record where pay_time &gt;= ${startTime} and pay_time &lt; ${endTime}
     </select>
-    <select id="getTimeCarIn" resultType="Integer">
+    <select id="getTimeCarIn" resultType="java.lang.Integer">
         SELECT count(id)  FROM t_parking_car_record where entry_time &gt;= ${startTime} and entry_time &lt; ${endTime}
     </select>
 </mapper>

@@ -1,6 +1,8 @@
 package com.wzwl.parking.service;
 
 import com.wzwl.parking.common.ResultEntity;
+import com.wzwl.parking.dto.CarSearchDTO;
+import com.wzwl.parking.dto.LongParkingDTO;
 
 /**
  * @ClassName CarSearchService
@@ -15,20 +17,15 @@ public interface CarSearchService {
 
     /**
      * 寻车管理,可根据车牌查询
-     * @param plateNo
-     * @param pageIndex
-     * @param pageSize
+     * @param dto
      * @return
      */
-    String getCarLocalInfo(String plateNo, Integer pageIndex, Integer pageSize);
+    String getCarLocalInfo(CarSearchDTO dto);
 
     /**
-     *
-     * @param days
-     * @param sortType
-     * @param pageIndex
-     * @param pageSize
+     * 长驻车管理
+     * @param dto
      * @return
      */
-    String getLongParkingCarInfo(Integer days, Integer sortType, Integer pageIndex, Integer pageSize);
+    String getLongParkingCarInfo(LongParkingDTO dto);
 }

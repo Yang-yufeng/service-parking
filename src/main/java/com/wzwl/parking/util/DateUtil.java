@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 
 /**
@@ -59,8 +60,9 @@ public class DateUtil {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return calendar.getTimeInMillis() / 1000;
+        return calendar.getTimeInMillis()/1000;
     }
+
 
     /**
      * 获取当天时间戳
@@ -84,6 +86,22 @@ public class DateUtil {
         return (int) (calendar.getTime().getTime() / 1000);
     }
 
+    public static void main(String[] args) {
+        System.out.println(getTimeStampByString("2020-11-19 20:44:44"));
+        long sd=1605789884000L;
+        Date dat=new Date(sd);
+        System.out.println(dat);
+        System.out.println("-------------");
+        Date date = new Date();
+        System.out.println(date);
+        System.out.println(sdf.format(date));
+        System.out.println(getTimeStampByString(sdf.format(date)));
+        Date date1 = new Date(getTimeStampByString(sdf.format(date))*1000);
+        System.out.println(date1);
+        long a = 1604999829*1000;
+        System.out.println(new Date(a));
+    }
+
     /**
      * 根据时间差计算得到的停车时长
      * @param today
@@ -95,7 +113,12 @@ public class DateUtil {
         long time = today - entryTime;
         long days = time/86400;
         long hour = time%86400/3600;
-        String result = days+"天"+hour+"小时";
+        String result = "";
+        if (days==0){
+            result = hour+"小时";
+        }else {
+            result = days+"天"+hour+"小时";
+        }
         return result;
 
     }

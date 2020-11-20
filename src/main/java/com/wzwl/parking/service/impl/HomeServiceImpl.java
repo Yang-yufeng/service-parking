@@ -1,5 +1,6 @@
 package com.wzwl.parking.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -15,6 +16,8 @@ import com.wzwl.parking.model.Environment;
 import com.wzwl.parking.service.HomeService;
 import com.wzwl.parking.util.DateUtil;
 import com.wzwl.parking.util.HttpUtil;
+import com.wzwl.parking.vo.EnvironmentVO;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,13 +52,13 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     @Transactional(rollbackFor=Exception.class)
-    public String getData(String companyId, String parkId) {
+    public String getOverviewData(String companyId) {
 
         JSONObject resultData = new JSONObject();
         NumberFormat percentFormat = NumberFormat.getPercentInstance();
         percentFormat.setMaximumFractionDigits(2);
 
-        //计算出今日凌晨、昨日凌晨、明日凌晨的时间戳
+        //计算出今日凌晨、昨日凌晨、明日凌晨的时间戳(用于比较今日较昨日的上升率)
         Calendar now = Calendar.getInstance();
         long today = DateUtil.getEarlyMorning(now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH));
         now.add(Calendar.DATE,-1);
@@ -63,17 +66,25 @@ public class HomeServiceImpl implements HomeService {
         now.add(Calendar.DATE,2);
         long tomorrow = DateUtil.getEarlyMorning(now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH));
 
-        //获取月租车充值记录（昨日及今日）
-        JSONObject recharge =  getRechargeData(companyId, parkId, percentFormat, today, yesterday, tomorrow);
-        resultData.put("recharge",recharge);
+        //获取月租车充值记录
+        JSONObject rechargeCount =  getRechargeData(companyId, percentFormat, today, yesterday, tomorrow);
+        resultData.put("rechargeCount",rechargeCount);
 
-        //车辆出入统计
-        JSONObject carEntryAndExitCount = getCarInOutData(companyId, parkId, percentFormat, today, yesterday, tomorrow);
+        //获取车辆出入统计信息
+        JSONObject carEntryAndExitCount = getCarInOutData(companyId, percentFormat, today, yesterday, tomorrow);
         resultData.put("carEntryAndExitCount",carEntryAndExitCount);
 
-        //开闸统计
-        JSONObject openGateCount = getJsonObject(companyId, parkId, percentFormat, today, tomorrow);
+        //获取开闸统计信息
+        JSONObject openGateCount = getJsonObject(companyId, percentFormat, today, tomorrow);
         resultData.put("openGateCount",openGateCount);
+
+        //获取车位信息
+        JSONObject parkingSpaceCount = getParkingSpaceInfo(companyId);
+        resultData.put("parkingSpaceCount",parkingSpaceCount);
+
+        //获取环境监测信息
+        JSONObject environmentDetectCount = getEnvironmentInfo(companyId);
+        resultData.put("environmentDetectCount",environmentDetectCount);
 
         ResultEntity result = new ResultEntity(ResultEnum.SUCCESS);
         result.setData(resultData);
@@ -81,20 +92,27 @@ public class HomeServiceImpl implements HomeService {
     }
 
 
-    @Override
-    public String getParkingSpaceInfo(String companyId, String parkId) {
+    /**
+     * 获得车位总数，空闲车位数，以及剩余车位总数
+     * @param companyId
+     * @return
+     */
+    public JSONObject getParkingSpaceInfo(String companyId) {
 
         JSONObject params = new JSONObject();
         params.put("companyId",companyId);
-        params.put("parkId",parkId);
-        JSONObject response = HttpUtil.doPost("http://localhost:80/car/selectParkingSpace",params);   //todo  配置信息获取
+        JSONObject response = HttpUtil.doPost("http://localhost:80/car/getParkingSpaceInfo",params);   //todo  配置信息获取
         JSONObject result = new JSONObject();
-
-        JSONArray array = response.getJSONArray("data");
-        //JSONArray array = data.getJSONArray("data");
+        //请求成功
+        if (response.getInteger("code")!=0){
+            result.put("totalSpaceNum",0);
+            result.put("freeSpaceNum",0);
+            result.put("occupySpaceNum",0);
+            return result;
+        }
+        JSONArray array = response.getJSONObject("data").getJSONArray("data");   //todo  统一定义,尽量不写死
         int totalSpaceNum = 0;
         int freeSpaceNum = 0;
-
         for (int i = 0; i < array.size(); i++) {
             JSONObject jsonObject = (JSONObject) array.get(i);
             totalSpaceNum+=jsonObject.getIntValue("totalSpaceNum");
@@ -103,45 +121,47 @@ public class HomeServiceImpl implements HomeService {
         result.put("totalSpaceNum",totalSpaceNum);
         result.put("freeSpaceNum",freeSpaceNum);
         result.put("occupySpaceNum",totalSpaceNum-freeSpaceNum);
-        ResultEntity entity = new ResultEntity(ResultEnum.SUCCESS);
-        entity.setData(result);
-        return entity.toString();
+        return result;
     }
 
-    @Override
-    public String getEnvironmentInfo(String companyId, String parkId) {
+    /**
+     * 获得环境监测中温度、湿度、二氧化碳浓度
+     * @param companyId
+     * @return
+     */
+    public JSONObject getEnvironmentInfo(String companyId) {
         QueryWrapper<Environment> wrapper = new QueryWrapper<>();
         wrapper.eq("company_id",companyId);
-        if (StringUtils.isNotEmpty(parkId)){
-            wrapper.eq("park_id",parkId);
-        }
         wrapper.orderByDesc("create_time");
         wrapper.last("limit 1");
         Environment model = environmentMapper.selectOne(wrapper);
-        ResultEntity entity = new ResultEntity(ResultEnum.SUCCESS);
-        entity.setData(model);
-        return entity.toString();
+        if (model==null){
+            return null;
+        }
+        EnvironmentVO vo = new EnvironmentVO();
+        BeanUtils.copyProperties(model,vo);
+        JSONObject result = (JSONObject) JSON.toJSON(vo);
+        return result;
     }
 
 
     /**
      * 获取运营金额数据（今日临停费用、今日月租车费用以及两者相较昨日的上升率）
      * @param companyId
-     * @param parkId
      * @param percentFormat
      * @param today
      * @param yesterday
      * @param tomorrow
      * @return
      */
-    private JSONObject getRechargeData(String companyId, String parkId, NumberFormat percentFormat, long today, long yesterday, long tomorrow) {
+    private JSONObject getRechargeData(String companyId, NumberFormat percentFormat, long today, long yesterday, long tomorrow) {
         JSONObject recharge = new JSONObject();
-        int yesterdayMonthlyFee = rechargeMapper.getMonthlyFee(companyId, parkId, yesterday, today);
-        int todayMonthlyFee = rechargeMapper.getMonthlyFee(companyId, parkId, today, tomorrow);
+        int yesterdayMonthlyFee = rechargeMapper.getMonthlyFee(companyId, yesterday, today)/100;
+        int todayMonthlyFee = rechargeMapper.getMonthlyFee(companyId, today, tomorrow)/100;
 
         //获取今日缴费记录（昨日及今日）
-        int yesterdayTemporaryFee = carRecordMapper.getDailyFee(companyId, parkId, yesterday, today);
-        int todayTemporaryFee = carRecordMapper.getDailyFee(companyId, parkId, today, tomorrow);
+        int yesterdayTemporaryFee = carRecordMapper.getDailyFee(companyId, yesterday, today)/100;
+        int todayTemporaryFee = carRecordMapper.getDailyFee(companyId, today, tomorrow)/100;
         //获得今日临停费用上升比率
         double todayTemporaryFeeRate;
         if ((yesterdayMonthlyFee+yesterdayTemporaryFee)==0){
@@ -168,18 +188,17 @@ public class HomeServiceImpl implements HomeService {
     /**
      * 获得概览里车辆出入统计数据（今日入车、出车、车位饱和率以及相较昨日的比率）
      * @param companyId
-     * @param parkId
      * @param percentFormat
      * @param today
      * @param yesterday
      * @param tomorrow
      * @return
      */
-    private JSONObject getCarInOutData(String companyId, String parkId, NumberFormat percentFormat, long today, long yesterday, long tomorrow) {
+    private JSONObject getCarInOutData(String companyId, NumberFormat percentFormat, long today, long yesterday, long tomorrow) {
         JSONObject carEntryAndExitCount = new JSONObject();
         //获取进场上报记录（昨日及今日）
-        int yesterdayEntryCount = carRecordMapper.getEntryCountByTime(companyId, parkId, yesterday, today);
-        int todayEntryCount = carRecordMapper.getEntryCountByTime(companyId, parkId, today, tomorrow);
+        int yesterdayEntryCount = carRecordMapper.getEntryCountByTime(companyId, yesterday, today);
+        int todayEntryCount = carRecordMapper.getEntryCountByTime(companyId, today, tomorrow);
         //获取今日较昨日入车数量百分比
         double todayEntryRate;
         if (yesterdayEntryCount==0){
@@ -191,8 +210,8 @@ public class HomeServiceImpl implements HomeService {
         carEntryAndExitCount.put("todayEntryCount",todayEntryCount);
         carEntryAndExitCount.put("todayEntryRate", percentFormat.format(todayEntryRate));
         //获取出场上报记录（昨日及今日）
-        int yesterdayExitCount = carRecordMapper.getExitCountByTime(companyId, parkId, yesterday, today);
-        int todayExitCount = carRecordMapper.getExitCountByTime(companyId, parkId, today, tomorrow);
+        int yesterdayExitCount = carRecordMapper.getExitCountByTime(companyId, yesterday, today);
+        int todayExitCount = carRecordMapper.getExitCountByTime(companyId, today, tomorrow);
         //获取今日较昨日入车数量百分比
         double todayExitRate;
         if (yesterdayExitCount==0){
@@ -203,10 +222,10 @@ public class HomeServiceImpl implements HomeService {
         }
         carEntryAndExitCount.put("todayExitCount",todayExitCount);
         carEntryAndExitCount.put("todayExitRate", percentFormat.format(todayExitRate));
-        //获取车位饱和率
-        Integer yesterdayHoldCount = carRecordMapper.getParkingSpaceUse(companyId, parkId, yesterday,System.currentTimeMillis()/1000-86400);
-        Integer todayHoldCount = carRecordMapper.getParkingSpaceUse(companyId, parkId, today,System.currentTimeMillis()/1000);
-        Integer parkingSpaceNum = carRecordMapper.getParkingSpaceCount(companyId, parkId, today,System.currentTimeMillis()/1000);
+        //获取停车周转率
+        Integer yesterdayHoldCount = carRecordMapper.getParkingSpaceUse(companyId, yesterday,System.currentTimeMillis()/1000-86400);
+        Integer todayHoldCount = carRecordMapper.getParkingSpaceUse(companyId, today,System.currentTimeMillis()/1000);
+        Integer parkingSpaceNum = carRecordMapper.getParkingSpaceCount(companyId, today,System.currentTimeMillis()/1000);
         double todayParkingSpaceRate = 0;
         double todayThanYesterdayRate = 0;
         if (parkingSpaceNum==null||parkingSpaceNum==0){
@@ -227,16 +246,15 @@ public class HomeServiceImpl implements HomeService {
     /**
      * 获得概览里开闸统计数据（正常、异常、免费以及相较总车位数的比率）
      * @param companyId
-     * @param parkId
      * @param percentFormat
      * @param today
      * @param tomorrow
      * @return
      */
-    private JSONObject getJsonObject(String companyId, String parkId, NumberFormat percentFormat, long today, long tomorrow) {
+    private JSONObject getJsonObject(String companyId, NumberFormat percentFormat, long today, long tomorrow) {
         JSONObject openGateCount = new JSONObject();
-        List<Map<String,Object>> todayExitTypeCount = carRecordMapper.getExitTypeCount(companyId, parkId, today, tomorrow);
-        List<Map<String,Object>> todayEntryTypeCount = carRecordMapper.getEntryTypeCount(companyId, parkId, today, tomorrow);
+        List<Map<String,Object>> todayExitTypeCount = carRecordMapper.getExitTypeCount(companyId, today, tomorrow);
+        List<Map<String,Object>> todayEntryTypeCount = carRecordMapper.getEntryTypeCount(companyId, today, tomorrow);
 
         int normalTypeCount = 0;
         int unNormalTypeCount = 0;

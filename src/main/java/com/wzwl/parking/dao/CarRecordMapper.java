@@ -32,77 +32,65 @@ public interface CarRecordMapper extends BaseMapper<CarRecord> {
     /**
      * 获取首页昨日及今日缴费记录
      * @param companyId
-     * @param parkId
      * @param before
      * @param after
      * @return
      */
-    int getDailyFee(@Param("companyId") String companyId, @Param("parkId")String parkId,
-                    @Param("before")long before,@Param("after")long after);
+    int getDailyFee(@Param("companyId") String companyId, @Param("before")long before,@Param("after")long after);
 
     /**
      * 获取昨日及今日的获取进场上报记录
      * @param companyId
-     * @param parkId
      * @param before
      * @param after
      * @return
      */
-    int getEntryCountByTime(@Param("companyId") String companyId, @Param("parkId")String parkId, @Param("before")long before, @Param("after")long after);
+    int getEntryCountByTime(@Param("companyId") String companyId, @Param("before")long before, @Param("after")long after);
 
     /**
      * 获取昨日及今日的出场上报记录
      * @param companyId
-     * @param parkId
      * @param before
      * @param after
      * @return
      */
-    int getExitCountByTime(@Param("companyId") String companyId, @Param("parkId")String parkId, @Param("before")long before, @Param("after")long after);
+    int getExitCountByTime(@Param("companyId") String companyId, @Param("before")long before, @Param("after")long after);
 
     /**
      * 入场开闸统计
      * @param companyId
-     * @param parkId
      * @param before
      * @param after
      * @return
      */
-    List<Map<String,Object>> getEntryTypeCount(@Param("companyId") String companyId, @Param("parkId")String parkId,
-                                           @Param("before")long before, @Param("after")long after);
+    List<Map<String,Object>> getEntryTypeCount(@Param("companyId") String companyId, @Param("before")long before, @Param("after")long after);
 
     /**
      * 出场开闸统计
      * @param companyId
-     * @param parkId
      * @param before
      * @param after
      * @return
      */
-    List<Map<String,Object>> getExitTypeCount(@Param("companyId") String companyId, @Param("parkId")String parkId,
-                                               @Param("before")long before, @Param("after")long after);
+    List<Map<String,Object>> getExitTypeCount(@Param("companyId") String companyId, @Param("before")long before, @Param("after")long after);
 
     /**
      * 获取进场上报总数
      * @param companyId
-     * @param parkId
      * @param before
      * @param after
      * @return
      */
-    Integer getParkingSpaceUse(@Param("companyId") String companyId, @Param("parkId")String parkId,
-                               @Param("before")long before, @Param("after")long after);
+    Integer getParkingSpaceUse(@Param("companyId") String companyId,@Param("before")long before, @Param("after")long after);
 
     /**
      * 获取车场总车位数
      * @param companyId
-     * @param parkId
      * @param before
      * @param after
      * @return
      */
-    Integer getParkingSpaceCount(@Param("companyId") String companyId, @Param("parkId")String parkId,
-                                 @Param("before")long before, @Param("after")long after);
+    Integer getParkingSpaceCount(@Param("companyId") String companyId, @Param("before")long before, @Param("after")long after);
 
     /**
      * 查询时间段的缴费收益

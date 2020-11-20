@@ -9,9 +9,6 @@
         <if test="companyId != null and companyId != ''" >
             and company_id = #{companyId,jdbcType=VARCHAR}
         </if>
-        <if test="parkId != null and parkId != ''">
-            and park_id = #{parkId,jdbcType=VARCHAR}
-        </if>
         <if test="before != null">
             and create_time &gt;= #{before,jdbcType=INTEGER}
         </if>

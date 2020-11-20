@@ -1,11 +1,9 @@
 package com.wzwl.parking.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import com.wzwl.parking.common.ResultEntity;
+import com.wzwl.parking.dto.OverViewDTO;
 import com.wzwl.parking.service.HomeService;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -17,7 +15,7 @@ import javax.annotation.Resource;
  * @Version 1.0
  */
 @RestController
-@RequestMapping("/show")
+@RequestMapping("/api/v1")
 public class HomeController {
 
     @Resource
@@ -25,33 +23,12 @@ public class HomeController {
 
 
     /**
-     * 获取首页运营金额、出入统计、开闸统计的数据
-     * @param companyId 公司id
-     * @param parkId 车场id
+     * 获取首页车位信息、环境监测、运营金额、出入统计、开闸统计的数据
+     * @param dto
      * @return
      */
-    @RequestMapping("/getData")
-    public String getData(@RequestParam String companyId,@RequestParam(required = false) String parkId){
-        return homeService.getData(companyId,parkId);
+    @PostMapping(value = "/parking/getOverviewData")
+    public String getOverviewData(@RequestBody @Validated OverViewDTO dto){
+        return homeService.getOverviewData(dto.getCompanyId());
     }
-
-
-    /**
-     * 获得车位总数，空闲车位数，以及剩余车位总数
-     * @return
-     */
-    @RequestMapping("/getParkingSpaceInfo")
-    public String getParkingSpaceInfo(@RequestParam String companyId,@RequestParam(required = false) String parkId){
-        return homeService.getParkingSpaceInfo(companyId,parkId);
-    }
-
-    /**
-     * 获得环境参数
-     * @return
-     */
-    @RequestMapping("/getEnvironmentInfo")
-    public String getEnvironmentInfo(@RequestParam String companyId,@RequestParam(required = false) String parkId){
-        return homeService.getEnvironmentInfo(companyId,parkId);
-    }
-
 }

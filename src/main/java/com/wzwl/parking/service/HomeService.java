@@ -12,26 +12,10 @@ import com.wzwl.parking.common.ResultEntity;
 public interface HomeService {
 
     /**
-     * 获取首页运营金额、出入统计、开闸统计的数据
+     * 获取首页车位信息、环境监测、运营金额、出入统计、开闸统计的数据
      * @param companyId
-     * @param parkId
      * @return
      */
-    String getData(String companyId, String parkId);
+    String getOverviewData(String companyId);
 
-    /**
-     * 获得车位总数，空闲车位数，以及剩余车位总数
-     * @param companyId
-     * @param parkId
-     * @return
-     */
-    String getParkingSpaceInfo(String companyId, String parkId);
-
-    /**
-     * 获得环境参数
-     * @param companyId
-     * @param parkId
-     * @return
-     */
-    String getEnvironmentInfo(String companyId, String parkId);
 }
